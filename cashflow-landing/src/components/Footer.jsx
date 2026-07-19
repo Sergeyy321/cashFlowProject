@@ -15,8 +15,22 @@ export function Footer() {
           © 2026 Cashflow Club. Образовательный проект. Все права защищены.
         </p>
         <div className="flex gap-4 text-xs font-semibold text-zinc-400">
-          <span className="hover:text-lime-400 cursor-pointer">Telegram</span>
-          <span className="hover:text-lime-400 cursor-pointer">Instagram</span>
+       <a 
+    href="https://t.me/CashFlow_Katowice" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="hover:text-lime-400 cursor-pointer transition-colors"
+  >
+    Telegram
+  </a>
+           <a 
+    href="https://www.instagram.com/cashflowkatowice/" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="hover:text-lime-400 cursor-pointer transition-colors"
+  >
+    Instagram
+  </a>
         </div>
       </div>
     </footer>

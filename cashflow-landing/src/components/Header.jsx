@@ -14,7 +14,7 @@ export function Header({ onOpenModal }) {
         
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
           <a href="#about" className="hover:text-lime-400 transition-colors">Об игре</a>
-          <a href="#calculator" className="hover:text-lime-400 transition-colors">Симулятор</a>
+          {/* <a href="#calculator" className="hover:text-lime-400 transition-colors">Симулятор</a> */}
           <a href="#quiz" className="hover:text-lime-400 transition-colors">Тест IQ</a>
           <a href="#faq" className="hover:text-lime-400 transition-colors">FAQ</a>
         </nav>
