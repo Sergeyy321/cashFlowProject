@@ -1,73 +1,72 @@
 
 import React, { useState } from 'react';
-
-export function BookingModal({ isOpen, onClose, calculatorState }) {
+import { useEffect } from 'react';
+export function BookingModal({ isOpen, onClose, selectedTier, defaultCity, instagramUsername = "cashflowkatowice" }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('Warszawa');
   const [messenger, setMessenger] = useState('telegram');
   const [status, setStatus] = useState({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
-  const CheckIcon = () => (
-      <svg className="w-16 h-16 text-emerald-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    );
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setName('');
+      setPhone('');
+      setStatus({ type: null, message: '' });
+      setCopied(false);
+      if (defaultCity) {
+        setCity(defaultCity);
+      }
+    }
+  }, [isOpen, defaultCity]);
 
   if (!isOpen) return null;
-  
+
+  // Генерация текста записи специально для Instagram DM
+  const generatedInstagramText = `
+🔥 Хочу на CASHFLOW!
+👤 Имя: ${name || 'Инвестор'}
+📞 Связь: ${phone} (${messenger.toUpperCase()})
+🇵🇱 Город: ${city}
+🎟️ Тариф: ${selectedTier ? selectedTier.toUpperCase() : 'ОБЩИЙ'}
+
+  `.trim();
+
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(generatedInstagramText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: null, message: '' });
 
-    // ТОКЕН и CHAT_ID из шага настройки Telegram
-    const TELEGRAM_BOT_TOKEN = "ВАШ_ТОКЕН_БОТА"; 
-    const TELEGRAM_CHAT_ID = "ВАШ_CHAT_ID"; 
+    // Имитация успешной отправки заявки
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Сохраняем локально (имитация отправки на бэкэнд)
+    const savedLeads = JSON.parse(localStorage.getItem('cashflow_leads') || '[]');
+    const newLead = {
+      id: Date.now().toString(),
+      name,
+      phone,
+      city,
+      messenger,
+      tier: selectedTier || 'general',
+      status: 'new',
+      created_at: new Date().toISOString()
+    };
+    localStorage.setItem('cashflow_leads', JSON.stringify([newLead, ...savedLeads]));
 
-    const messageText = `
-    🔔 *Новая запись на Cashflow!*
-    👤 *Имя:* ${name}
-    📞 *Телефон:* ${phone}
-    💬 *Связь:* ${messenger}
-    🇵🇱 *Город:* ${city}
-    📊 *Данные калькулятора:*
-    - Активный доход: ${calculatorState?.salary || 6000} PLN
-    - Пассивный доход: ${calculatorState?.passive || 800} PLN
-    - Расходы: ${calculatorState?.expenses || 4500} PLN
-    `.trim();
-        
-    try {
-      if (TELEGRAM_BOT_TOKEN !== "ВАШ_ТОКЕН_БОТА") {
-        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: messageText,
-            parse_mode: 'Markdown'
-          })
-        });
-
-        if (!response.ok) throw new Error('Ошибка Telegram API');
-      } else {
-        // Симуляция успешной отправки для теста
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log('Данные формы успешно сохранены локально:', { name, phone, city, messenger });
-      }
-
-      setStatus({ 
-        type: 'success', 
-        message: 'Спасибо! Ваша заявка принята. Организатор свяжется с вами в течение получаса.' 
-      });
-    } catch (err) {
-      setStatus({ 
-        type: 'error', 
-        message: 'Произошла ошибка при отправке заявки. Пожалуйста, попробуйте еще раз.' 
-      });
-    } finally {
-      setLoading(false);
-    }
+    setStatus({ 
+      type: 'success', 
+      message: 'Ваша заявка успешно зарегистрирована в системе!' 
+    });
+    setLoading(false);
   };
 
   const handleCloseAndReset = () => {
@@ -79,9 +78,8 @@ export function BookingModal({ isOpen, onClose, calculatorState }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-850 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,0,0,0.7)]">
+      <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-850 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,0,0,0.7)] max-h-[90vh] overflow-y-auto">
         
-        {/* Кнопка закрытия */}
         <button 
           onClick={handleCloseAndReset}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-850 flex items-center justify-center text-zinc-400 hover:text-white hover:border-lime-400 transition-all duration-300"
@@ -90,27 +88,45 @@ export function BookingModal({ isOpen, onClose, calculatorState }) {
         </button>
 
         {status.type === 'success' ? (
-          <div className="text-center py-6">
-            <CheckIcon />
-            <h3 className="text-xl font-bold text-white mb-2">Успешное бронирование</h3>
-            <p className="text-zinc-400 text-sm mb-6 leading-relaxed">{status.message}</p>
-            <button 
-              onClick={handleCloseAndReset}
-              className="w-full py-3 bg-zinc-950 border border-zinc-800 hover:border-lime-400 text-white rounded-xl text-sm font-semibold transition-all duration-300"
-            >
-              Закрыть
-            </button>
+          <div className="text-center py-4">
+
+            <h3 className="text-xl font-bold text-white mb-2">Успешное бронирование!</h3>
+            <p className="text-zinc-400 text-xs mb-6 leading-relaxed">
+              Заявка сохранена в базу. Чтобы подтвердить участие мгновенно и связаться с организатором, **скопируйте готовый шаблон для Instagram** и отправьте его нам в Direct:
+            </p>
+
+            {/* Блок сгенерированного текста для Instagram */}
+            <div className="mb-6 p-4 bg-zinc-950 rounded-xl border border-zinc-850 text-left font-mono text-xs text-zinc-300 whitespace-pre-wrap relative group">
+              {generatedInstagramText}
+              <button 
+                onClick={handleCopyText}
+                className="absolute bottom-2 right-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-lime-400 rounded-lg text-[10px] font-bold border border-zinc-800 transition"
+              >
+                {copied ? 'Скопировано! ✅' : 'Скопировать 📋'}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <a 
+                href={`https://instagram.com/${instagramUsername}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 text-white font-bold rounded-xl text-sm transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                📸 Написать нам в Instagram
+              </a>
+              <button 
+                onClick={handleCloseAndReset}
+                className="w-full py-3 bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-sm font-semibold transition"
+              >
+                Закрыть окно
+              </button>
+            </div>
           </div>
         ) : (
           <div>
             <h3 className="text-xl font-bold text-white mb-1">Забронировать место</h3>
             <p className="text-xs text-zinc-500 mb-6">Оставьте контакты, и мы свяжемся для согласования времени игры.</p>
-
-            {status.type === 'error' && (
-              <div className="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-400 font-medium">
-                {status.message}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -138,6 +154,7 @@ export function BookingModal({ isOpen, onClose, calculatorState }) {
                     value={messenger} onChange={(e) => setMessenger(e.target.value)}
                     className="w-full bg-zinc-950 border border-zinc-850 focus:border-lime-400 rounded-xl px-3 py-3 text-white text-sm focus:outline-none cursor-pointer"
                   >
+                    <option value="instagram">Instagram DM</option>
                     <option value="telegram">Telegram</option>
                     <option value="whatsapp">WhatsApp</option>
                     <option value="call">Звонок</option>
@@ -161,7 +178,7 @@ export function BookingModal({ isOpen, onClose, calculatorState }) {
                 type="submit" disabled={loading}
                 className="w-full py-3.5 mt-4 bg-gradient-to-r from-lime-400 to-emerald-400 text-zinc-950 font-bold rounded-xl hover:opacity-90 transition-all duration-300 text-sm uppercase tracking-wider shadow-[0_0_20px_rgba(163,230,53,0.15)]"
               >
-                {loading ? 'Отправка...' : 'Отправить запрос'}
+                {loading ? 'Отправка...' : 'Зарегистрироваться'}
               </button>
             </form>
           </div>
