@@ -37,11 +37,11 @@ export function SchedulePricing({ eventDetails, customPrices, onOpenModal, siteT
       <div className="max-w-5xl mx-auto">
         
         {/* Анонс ближайшей встречи */}
-        <div className="mb-16 p-8 rounded-3xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800 shadow-2xl relative overflow-hidden">
+        <div  className="mb-16 p-8 rounded-3xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-lime-400/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="text-center max-w-2xl mx-auto relative z-10">
-            <span className="text-lime-400 text-xs font-bold uppercase tracking-widest bg-lime-400/10 px-3 py-1.5 rounded-full border border-lime-400/20 mb-2 inline-block">
+            <span  id="games" className="text-lime-400 text-xs font-bold uppercase tracking-widest bg-lime-400/10 px-3 py-1.5 rounded-full border border-lime-400/20 mb-2 inline-block">
               ⚡ Ближайший сбор
             </span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-4 mb-3">

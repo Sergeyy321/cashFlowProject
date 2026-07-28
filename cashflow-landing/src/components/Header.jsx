@@ -17,6 +17,7 @@ export function Header({ onOpenModal }) {
           {/* <a href="#calculator" className="hover:text-lime-400 transition-colors">Симулятор</a> */}
           <a href="#quiz" className="hover:text-lime-400 transition-colors">Тест IQ</a>
           <a href="#faq" className="hover:text-lime-400 transition-colors">FAQ</a>
+                <a href="#games" className="hover:text-lime-400 transition-colors">Игры</a>
         </nav>
         
         <button 

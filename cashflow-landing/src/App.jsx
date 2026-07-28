@@ -49,7 +49,7 @@ export default function App() {
       <Hero onOpenModal={() => setIsModalOpen(true)} />
       <GameProcess />
       <Benefits />
-      {/* <Quiz onOpenModal={() => setIsModalOpen(true)} /> */}
+      <Quiz onOpenModal={() => setIsModalOpen(true)} />
       <FAQ />
 
       <SchedulePricing

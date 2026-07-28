@@ -38,7 +38,7 @@ export function Hero({ onOpenModal }) {
             onClick={onOpenModal}
             className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-lime-400 to-emerald-400 text-zinc-950 font-bold rounded-xl hover:opacity-90 transition-all duration-300 shadow-[0_0_30px_rgba(163,230,53,0.25)] text-base mt-4 sm:mt-0"
           >
-            Записаться на тест-драйв
+            Записаться на игру
           </button>
           {/* <a 
             href="#calculator"
