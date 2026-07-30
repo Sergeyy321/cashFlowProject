@@ -147,13 +147,12 @@ const calculatePrice = () => {
         participants
       );
 
-      const response = await fetch(
-        url= import.meta.env.VITE_apiKey,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+    const url = import.meta.env.VITE_apiKey;
+
+const response = await fetch(url, {
+  method: "POST",
+  body: formData,
+});
 
       if (!response.ok) {
         throw new Error("Ошибка сервера");
@@ -356,7 +355,6 @@ const calculatePrice = () => {
                 <label className="block text-xs uppercase text-zinc-500 mb-2">
                   Выбор плана
                 </label>
-
             <select
   value={participants}
   onChange={(e)=>setParticipants(Number(e.target.value))}
@@ -375,18 +373,18 @@ const calculatePrice = () => {
                     { length: MAX_PARTICIPANTS },
                     (_, i) => (
                       <option
-                        key={i + 1}
-                        value={i + 1}
+                      key={i + 1}
+                      value={i + 1}
                       >
-                        {i + 1} {i === 0 ? "участник" : "участников"}
+                      {i + 1} {i === 0 ? "участник" : "участников"}
                       </option>
-                    )
-                  )}
-                </select>
+                      )
+                      )}
+                      </select>
               </div> */}
 </select>
+                      </div>
 <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4">
-
   <div className="flex justify-between mb-2">
     <span className="text-zinc-400">
       Участники
@@ -407,6 +405,7 @@ const calculatePrice = () => {
     <span className="text-lime-400 font-bold text-xl">
       {calculatePrice()} zł
     </span>
+
 
   </div>
 
