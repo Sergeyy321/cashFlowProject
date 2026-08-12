@@ -47,7 +47,7 @@ export function BookingModal({
   async function loadPlaces() {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbz9HiG7j0Md5ODX7NLzD-kVbSiTxZNuPUiwSV8TJwWy_XCbKG_jJHBmRjd1Qoqhmd0q/exec"
+       import.meta.env.VITE_URL
       );
 
       const data = await response.json();

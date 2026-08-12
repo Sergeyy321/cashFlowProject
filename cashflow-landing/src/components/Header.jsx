@@ -1,30 +1,84 @@
-import React from "react";
-export function Header({ onOpenModal }) {
+import React, { useState, useEffect } from 'react';
+
+const CheckIcon = () => (
+  <svg className="w-12 h-12 text-emerald-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const CashIcon = () => (
+  <svg className="w-6 h-6 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const WoodIcon = () => (
+  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+  </svg>
+);
+
+export const Header = ({ activePage, setActivePage, onOpenModal }) => {
   return (
-    <header className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-emerald-950/30">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-lime-400 flex items-center justify-center text-zinc-950 font-extrabold text-xl shadow-[0_0_15px_rgba(163,230,53,0.3)]">
-            $
-          </div>
-          <span className="font-bold text-xl tracking-tight text-white">
-            CASHFLOW <span className="text-lime-400">CLUB</span>
-          </span>
+    <header className="sticky top-0 z-40 bg-zinc-950/85 backdrop-blur-md border-b border-zinc-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+        
+        {/* Brand Switcher Navigation */}
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setActivePage('cashflow')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all duration-300 font-bold text-sm ${
+              activePage === 'cashflow'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-lime-500/20 border border-lime-400/50 text-white shadow-[0_0_15px_rgba(163,230,53,0.15)]'
+                : 'text-zinc-400 hover:text-white bg-zinc-900/50 border border-zinc-800/80'
+            }`}
+          >
+            <CashIcon />
+            <span>CASHFLOW <span className="text-lime-400">CLUB</span></span>
+          </button>
+
+          <button 
+            onClick={() => setActivePage('woodiq')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all duration-300 font-bold text-sm ${
+              activePage === 'woodiq'
+                ? 'bg-amber-500/20 border border-amber-400/50 text-white shadow-[0_0_15px_rgba(251,191,36,0.15)]'
+                : 'text-zinc-400 hover:text-white bg-zinc-900/50 border border-zinc-800/80'
+            }`}
+          >
+            <WoodIcon />
+            <span>WOOD<span className="text-amber-400">IQ</span></span>
+          </button>
         </div>
-        
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-          <a href="#about" className="hover:text-lime-400 transition-colors">Об игре</a>
-          {/* <a href="#calculator" className="hover:text-lime-400 transition-colors">Симулятор</a> */}
-          <a href="#quiz" className="hover:text-lime-400 transition-colors">Тест IQ</a>
+
+        {/* Section Anchors */}
+        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-zinc-400">
+          {activePage === 'cashflow' ? (
+            <>
+              <a href="#schedule" className="hover:text-lime-400 transition-colors">Ближайшая игра</a>
+              <a href="#about" className="hover:text-lime-400 transition-colors">О тренинге</a>
+              <a href="#process" className="hover:text-lime-400 transition-colors">Процесс</a>
+       
+              <a href="#quiz" className="hover:text-lime-400 transition-colors">Тест IQ</a>
+            </>
+          ) : (
+            <>
+              <a href="#wood-catalog" className="hover:text-amber-400 transition-colors">Каталог игр</a>
+              <a href="#wood-pricing" className="hover:text-amber-400 transition-colors">Аренда</a>
+            </>
+          )}
           <a href="#faq" className="hover:text-lime-400 transition-colors">FAQ</a>
-                <a href="#games" className="hover:text-lime-400 transition-colors">Игры</a>
         </nav>
-        
+
+        {/* Action CTA Button */}
         <button 
           onClick={onOpenModal}
-          className="px-5 py-2.5 bg-lime-400 text-zinc-950 font-bold rounded-xl hover:bg-lime-300 transition-all duration-300 text-sm shadow-[0_0_20px_rgba(163,230,53,0.15)]"
+          className={`px-5 py-2 font-bold rounded-xl transition-all duration-300 text-sm ${
+            activePage === 'cashflow'
+              ? 'bg-lime-400 text-zinc-950 hover:bg-lime-300 shadow-[0_0_20px_rgba(163,230,53,0.2)]'
+              : 'bg-amber-400 text-zinc-950 hover:bg-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.2)]'
+          }`}
         >
-          Занять стол
+          {activePage === 'cashflow' ? 'Занять стол' : 'Заказать игры'}
         </button>
       </div>
     </header>
