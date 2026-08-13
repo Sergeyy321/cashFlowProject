@@ -3,43 +3,112 @@ import { useState } from 'react';
 import fiveInARow from '../img/fiveInARow.jpg';
 import django from '../img/django.jpg';
 import balanceDisk from '../img/balance.jpg';
+import aeroHockey from '../img/aeroHockey.jpg';
+import elasticBall from '../img/elasticBall.jpg';
+import memoryFortBoyard from '../img/memoryFortBoyard.jpg';
+import magnets from '../img/magnets.jpg';
+import kulbito from '../img/kulbito.jpg';
+import plynko from '../img/plynko.jpg';
 
-export function WoodIQRentals({ onOpenModal }) {
+export function WoodIQSelling({ onOpenModal }) {
   const [selectedGame, setSelectedGame] = useState(null);
 
-  const rentals = [
-    {
-      name: 'Пять в ряд',
-      description:
-        'Большая деревянная версия классической игры. Отличный вариант для соревнований на мероприятии, корпоративе или празднике.',
-      image: fiveInARow,
-      price: 'от 1 5 ',
-      tag: 'Стратегия',
-      features: ['Большое игровое поле', 'Комплект фишек', 'Подходит для 2 игроков'],
-    },
-    {
-      name: 'Большая Дженга',
-      description:
-        'Гигантская деревянная башня для весёлых соревнований. Чем выше башня — тем сложнее сделать следующий ход.',
-      image: django,
-      price: 'от 2 00',
-      tag: 'Веселье',
-      features: ['Большие деревянные бруски', 'Устойчивая конструкция', 'Для компании'],
-    },
-    {
-      name: 'Баланс Диск',
-      description:
-        'Игра на ловкость и концентрацию. Участникам необходимо удержать элементы на диске и не допустить их падения.',
-      image: balanceDisk,
-      price: 'от 1 50₽',
-      tag: 'Ловкость',
-      features: ['Деревянный диск', 'Набор элементов', 'Подходит для соревнований'],
-    },
-  ];
+const rentals = [
+  {
+    name: 'Четыре в ряд',
+    description:
+      'Большая деревянная версия классической игры. Отличный вариант для соревнований на мероприятии, корпоративе или празднике.',
+    image: fiveInARow,
+    tag: 'Стратегия',
+    rental: '10',
+    sale: 'от 59€',
+    features: ['Большое игровое поле', 'Комплект фишек', 'Подходит для 2 игроков'],
+  },
+  {
+    name: 'Большая Дженга',
+    description:
+      'Гигантская деревянная башня для весёлых соревнований. Чем выше башня — тем сложнее сделать следующий ход.',
+    image: django,
+    tag: 'Веселье',
+    rental: 'от ',
+    sale: '259€',
+    features: ['Большие деревянные бруски', 'Устойчивая конструкция', 'Для компании'],
+  },
+  {
+    name: 'Баланс Диск',
+    description:
+      'Игра на ловкость и концентрацию. Участникам необходимо удержать элементы на диске и не допустить их падения.',
+    image: balanceDisk,
+    tag: 'Ловкость',
+    rental: 'от 15',
+    sale: '89€',
+    features: ['Деревянный диск', 'Набор элементов', 'Подходит для соревнований'],
+  },
+  {
+    name: 'Аэрохоккей',
+    description:
+      'Динамичная деревянная игра для двух участников. Соревнуйтесь в скорости, реакции и точности, стараясь забить шайбу сопернику.',
+    image: aeroHockey,
+    tag: 'Соревнование',
+    rental: '20',
+    sale: '119€',
+    features: ['Игровой стол', 'Шайбы и аксессуары', 'Для 2 игроков'],
+  },
+  {
+    name: 'Эластик',
+    description:
+      'Весёлая игра на реакцию и координацию. Задача участников — управлять движением мяча и набрать больше очков.',
+    image: elasticBall,
+    tag: 'Ловкость',
+    rental: 'от 15',
+    sale: '89€',
+    features: ['Деревянная конструкция', 'Эластичный мяч', 'Подходит для соревнований'],
+  },
+  {
+    name: 'Мемори Форт Боярд',
+    description:
+      'Большая версия игры на память в стиле знаменитого Форт Боярд. Участникам предстоит запоминать расположение элементов и находить нужные пары.',
+    image: memoryFortBoyard,
+    tag: 'Память',
+    rental: '15',
+    sale: '89€',
+    features: ['Игровое поле', 'Комплект элементов', 'Для детей и взрослых'],
+  },
+  {
+    name: 'Магниты',
+    description:
+      'Захватывающая настольная игра с магнитными элементами. Отличный вариант для проверки ловкости, точности и стратегического мышления.',
+    image: magnets,
+    tag: 'Стратегия',
+    rental: null,
+    sale: 'от 15€',
+    features: ['Деревянное поле', 'Магнитные элементы', 'Для компании'],
+  },
+  {
+    name: 'Кульбито',
+    description:
+      'Необычная деревянная игра, в которой участникам необходимо проявить ловкость и точность, чтобы выполнить игровую задачу.',
+    image: kulbito,
+    tag: 'Ловкость',
+    rental: ' 15',
+    sale: '119€',
+    features: ['Деревянная конструкция', 'Игровые элементы', 'Подходит для мероприятий'],
+  },
+  {
+    name: 'Плинко',
+    description:
+      'Большая версия популярной игры Плинко. Запускайте шарик сверху и наблюдайте за его движением через препятствия — результат зависит от удачи и точности.',
+    image: plynko,
+    tag: 'Веселье',
+    rental: '20',
+    sale: '119€',
+    features: ['Большое игровое поле', 'Шарики', 'Подходит для соревнований'],
+  },
+];
 
   return (
     <section
-      id="wood-rentals"
+      id="wood-pricing"
       className="py-20 px-6 bg-zinc-950"
     >
       <div className="max-w-6xl mx-auto">
@@ -120,21 +189,23 @@ export function WoodIQRentals({ onOpenModal }) {
                 </div>
 
                 {/* Цена */}
-                <div className="flex items-end justify-between mb-5">
+                <div className="flex items-end justify-between mb-2">
                   <div>
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                      Аренда
-                    </span>
-
-                    <div className="text-xl font-extrabold text-white">
-                      {game.price}
+              
+                  </div>
                     </div>
+                         <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                      Покупка
+
+                    </span>
+                        <div className="text-xl font-extrabold text-white">
+                      {game.sale}     
+                 
+                    
                   </div>
 
-                  <span className="text-xs text-zinc-500">
-                    / сутки
-                  </span>
-                </div>
+               
+                
 
                 {/* Кнопка */}
                 <button
@@ -142,7 +213,7 @@ export function WoodIQRentals({ onOpenModal }) {
                   onClick={() => onOpenModal('woodiq_rental')}
                   className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition-all"
                 >
-                  Забронировать
+                  Забронировать / Купить
                 </button>
               </div>
             </div>

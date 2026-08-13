@@ -1,31 +1,6 @@
+import heroVideo from '../videos/video_2026-08-13_10-16-00.mp4'
 export function HeroWoodIQ({ onOpenModal, setActivePage }) {
   return (
-    <section className="py-24 px-6 bg-gradient-to-b from-amber-950/30 via-zinc-950 to-zinc-950 border-b border-amber-900/20">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 bg-amber-950/40 border border-amber-800/50 px-4 py-2 rounded-full text-xs font-bold text-amber-400 mb-6">
-          🪵 Премиальные Деревянные Игры & Эко-Аттракционы
-        </div>
-        <h1 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
-          Эко-игры и гигантские головоломки для ваших <span className="text-amber-400">ивентов</span>
-        </h1>
-        <p className="text-zinc-400 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-          Аренда рефлекторных деревянных аттракционов ручной работы для корпоративов, свадеб, фестивалей и семейных праздников.
-        </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button
-            onClick={() => onOpenModal('woodiq_rental')}
-            className="px-8 py-4 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-base shadow-[0_0_25px_rgba(251,191,36,0.25)] transition-all"
-          >
-            Заказать на мероприятие
-          </button>
-          <button
-            onClick={() => setActivePage('cashflow')}
-            className="px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-lime-400 text-zinc-300 font-semibold rounded-xl text-base transition-all"
-          >
-            💸 Перейти к Cashflow
-          </button>
-        </div>
-      </div>
-    </section>
+<section className="relative isolate min-h-[700px] overflow-hidden border-b border-amber-900/20"> {/* ========================= ВИДЕО НА ФОНЕ ========================== */} <video className="absolute inset-0 z-0 h-full w-full object-cover" autoPlay muted loop playsInline preload="auto" > <source src={heroVideo} type="video/mp4" /> </video> {/* ========================= ЗАТЕМНЕНИЕ ========================== */} <div className="absolute inset-0 z-10 bg-black/50" /> {/* Тёплый оттенок */} <div className="absolute inset-0 z-10 bg-gradient-to-b from-amber-950/30 via-zinc-950/40 to-zinc-950/95" /> {/* ========================= КОНТЕНТ ========================== */} <div className="relative z-20 flex min-h-[700px] items-center px-6 py-24"> <div className="mx-auto w-full max-w-4xl text-center"> {/* Бейдж */} <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-black/40 px-4 py-2 text-xs font-bold text-amber-300 shadow-lg backdrop-blur-md"> 🪵 Премиальные деревянные игры & эко-аттракционы </div> {/* Заголовок */} <h1 className="mb-6 text-4xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:text-6xl lg:text-7xl"> Эко-игры и гигантские головоломки для ваших{' '} <span className="text-amber-300"> ивентов </span> </h1> {/* Описание */} <p className="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.9)] md:text-xl"> Аренда рефлекторных деревянных аттракционов ручной работы для корпоративов, свадеб, фестивалей и семейных праздников. </p> {/* Кнопки */} <div className="flex flex-col justify-center gap-4 sm:flex-row"> <button type="button" onClick={() => onOpenModal('woodiq_rental')} className="rounded-xl bg-amber-400 px-8 py-4 text-base font-bold text-zinc-950 shadow-[0_0_30px_rgba(251,191,36,0.3)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_40px_rgba(251,191,36,0.45)]" > Заказать на мероприятие </button> <button type="button" onClick={() => setActivePage('cashflow')} className="rounded-xl border border-white/30 bg-black/40 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/60 hover:bg-black/60" > 💸 Перейти к Cashflow </button> </div> {/* Нижняя подпись */} <div className="mt-10 flex items-center justify-center gap-2 text-sm text-white/70"> <span className="h-2 w-2 animate-pulse rounded-full bg-amber-300" /> <span>Деревянные игры ручной работы</span> </div> </div> </div> {/* ========================= ПЛАВНЫЙ ПЕРЕХОД В СЛЕДУЮЩУЮ СЕКЦИЮ ========================== */} <div className="absolute bottom-0 left-0 right-0 z-20 h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" /> </section>
   );
 }

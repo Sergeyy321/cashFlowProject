@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { doc, onSnapshot, db } from './firebase/FireBase';
-import { WoodIQRentals } from './components/WoodIQRentals';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Benefits } from './components/Benefits';
@@ -15,6 +14,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { HeroWoodIQ } from './components/HeroWoodIQ';
 import { WoodIQCatalog } from './components/WoodIQCatalog';
 import { FAQGames } from './components/FAQGames';
+import { WoodIQRentals } from './components/WoodIQRental';
+import { WoodIQSelling } from './components/WoodIQSelling';
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTier, setSelectedTier] = useState('general')
@@ -75,7 +76,9 @@ export default function App() {
           <HeroWoodIQ onOpenModal={handleOpenModal} setActivePage={setActivePage} />
             <WoodIQCatalog onOpenModal={handleOpenModal} />
                 <FAQGames />
-          <WoodIQRentals onOpenModal={handleOpenModal} customPrices={prices} />
+            <WoodIQSelling onOpenModal={handleOpenModal} customPrices={prices} />
+            <WoodIQRentals onOpenModal={handleOpenModal}  />
+            {/* <WoodIQSelling onOpenModal={handleOpenModal} /> */}
         </>
       )}
       <Footer activePage={activePage} />

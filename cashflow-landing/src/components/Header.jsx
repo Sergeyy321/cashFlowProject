@@ -63,7 +63,8 @@ export const Header = ({ activePage, setActivePage, onOpenModal }) => {
           ) : (
             <>
               <a href="#wood-catalog" className="hover:text-amber-400 transition-colors">Каталог игр</a>
-              <a href="#wood-pricing" className="hover:text-amber-400 transition-colors">Аренда</a>
+                <a href="#wood-pricing" className="hover:text-amber-400 transition-colors">Покупка</a>
+                    <a href="#wood-rental" className="hover:text-amber-400 transition-colors">Аренда</a>
             </>
           )}
           <a href="#faq" className="hover:text-lime-400 transition-colors">FAQ</a>
