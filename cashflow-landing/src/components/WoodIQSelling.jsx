@@ -194,7 +194,7 @@ const rentals = [
               
                   </div>
                     </div>
-                         <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                         {/* <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
                       Покупка
 
                     </span>
@@ -202,7 +202,7 @@ const rentals = [
                       {game.sale}     
                  
                     
-                  </div>
+                  </div> */}
 
                
                 

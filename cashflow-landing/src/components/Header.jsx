@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import WoodIcon from ''
 const CheckIcon = () => (
   <svg className="w-12 h-12 text-emerald-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -12,11 +12,7 @@ const CashIcon = () => (
   </svg>
 );
 
-const WoodIcon = () => (
-  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-  </svg>
-);
+
 
 export const Header = ({ activePage, setActivePage, onOpenModal }) => {
   return (
