@@ -25,13 +25,9 @@ export function Hero({ onOpenModal }) {
           Интерактивный тренинг финансового мышления в Польше
         </div>
         
-   <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15]">
-  Вырвись из финансовой рутины за{" "}
-  <span className="bg-gradient-to-r from-lime-400 to-emerald-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
-    4 часа
-  </span>{" "}
-  игры
-</h1>
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15]">
+          Вырвись из финансовой рутины за <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-400">4 часа</span> игры
+        </h1>
         
         <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed text-center  ">
           Легендарный экономический симулятор Роберта Кийосаки. Прокачайте инвестиционное мышление, совершая рискованные сделки на бумаге, а не на реальных деньгах.
