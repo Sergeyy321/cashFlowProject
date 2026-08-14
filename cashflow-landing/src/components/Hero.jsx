@@ -26,9 +26,9 @@ export function Hero({ onOpenModal }) {
         </div>
         
    <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15]">
-  Вырвись из финансовой рутины за{" "}
+ {" "}
   <span className="bg-gradient-to-r from-lime-400 to-emerald-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
-    4 часа
+    Вырвись из финансовой рутины за 4 часа
   </span>{" "}
   игры
 </h1>
