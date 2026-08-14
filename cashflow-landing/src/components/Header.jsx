@@ -37,7 +37,7 @@ export const Header = ({ activePage, setActivePage, onOpenModal }) => {
                 : 'text-zinc-400 hover:text-white bg-zinc-900/50 border border-zinc-800/80'
             }`}
           >
-            <WoodIcon />
+          
             <span>WOOD<span className="text-amber-400">IQ</span></span>
           </button>
         </div>
