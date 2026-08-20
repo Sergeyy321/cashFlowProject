@@ -78,7 +78,7 @@ export function WoodIQCatalog({ onOpenModal }) {
                 </div>
 
                 <button
-                  onClick={() => onOpenModal('woodiq_rental')}
+                 onClick={() => onOpenModal('woodiq_rental', g.name)}
                   className="w-full py-2.5 bg-zinc-955 hover:bg-amber-400 hover:text-zinc-950 text-amber-400 font-bold rounded-xl text-xs border border-amber-400/30 transition-all"
                 >
                   Забронировать игру

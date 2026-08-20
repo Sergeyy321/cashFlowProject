@@ -210,7 +210,7 @@ const rentals = [
                 {/* Кнопка */}
                 <button
                   type="button"
-                  onClick={() => onOpenModal('woodiq_rental')}
+                onClick={() => onOpenModal('woodiq_rental', game.name)}
                   className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition-all"
                 >
                   Забронировать / Купить
