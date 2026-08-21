@@ -144,11 +144,7 @@ formData.append(
     : "2"
 );
 
-      formData.append(
-        "participants",
-        participants
-      );
-
+  
     const url = import.meta.env.VITE_URL;
 
 const response = await fetch(url, {
