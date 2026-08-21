@@ -7,12 +7,13 @@ export const ProductSwitcher = ({ activePage, setActivePage }) => {
     <button
       onClick={() => setActivePage(isCashflow ? 'woodiq' : 'cashflow')}
       className={`
-        fixed bottom-5 right-5 z-50
-        group
-        flex items-center gap-3
-        rounded-2xl
-        border
-        px-3 py-3
+      fixed bottom-5 right-5 z-50
+    group
+    
+    flex items-center gap-2 sm:gap-3
+    rounded-2xl
+    border
+     p-[8px] sm:px-3 sm:py-3
         backdrop-blur-xl
         transition-all duration-300
         hover:-translate-y-1
@@ -29,8 +30,10 @@ export const ProductSwitcher = ({ activePage, setActivePage }) => {
       {/* Иконка */}
       <div
         className={`
-          flex items-center justify-center
-          w-11 h-11
+     hidden sm:flex
+    items-center justify-center
+    w-11 h-11
+    
           rounded-xl
           transition-all duration-300
           ${
@@ -61,19 +64,73 @@ export const ProductSwitcher = ({ activePage, setActivePage }) => {
     }
   `}</style>
 
-  <div className="
-    w-14 h-14
-    rounded-2xl
-    overflow-hidden
-    border-2 border-amber-400/40
-    woodiq-border-pulse
-  ">
-    <img
-      src={woodiqLogo}
-      alt="WOODIQ"
-      className="w-full h-full object-cover"
-    />
-  </div>
+{/* Иконка */}
+<div
+  className={`
+    ${isCashflow ? 'hidden sm:flex' : 'flex'}
+    items-center justify-center
+    w-11 h-11
+    rounded-xl
+    transition-all duration-300
+    ${
+      isCashflow
+        ? 'bg-amber-400/15 text-amber-400 group-hover:bg-amber-400/25'
+        : 'bg-lime-400/15 text-lime-400 group-hover:bg-lime-400/25'
+    }
+  `}
+>
+  {isCashflow ? (
+    <>
+      <style>{`
+        @keyframes borderPulse {
+          0%, 70%, 100% {
+            border-color: rgba(251, 191, 36, 0.35);
+            box-shadow: 0 0 0 rgba(251, 191, 36, 0);
+          }
+
+          80% {
+            border-color: rgba(251, 191, 36, 1);
+            box-shadow: 0 0 18px rgba(251, 191, 36, 0.5);
+          }
+        }
+
+        .woodiq-border-pulse {
+          animation: borderPulse 3s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div
+        className="
+          w-14 h-14
+          rounded-2xl
+          overflow-hidden
+          border-2 border-amber-400/40
+          woodiq-border-pulse
+        "
+      >
+        <img
+          src={woodiqLogo}
+          alt="WOODIQ"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </>
+  ) : (
+    <svg
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0z"
+      />
+    </svg>
+  )}
+</div>
 </>
         ) : (
           // Деньги / Cashflow

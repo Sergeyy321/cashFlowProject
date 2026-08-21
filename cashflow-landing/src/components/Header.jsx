@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-
+import woodiqLogo from '../img/WOOD IQ-01.svg';
 
 const CashIcon = () => (
   <svg className="w-6 h-6 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,17 +29,26 @@ export const Header = ({ activePage, setActivePage, onOpenModal }) => {
             <span>CASHFLOW <span className="text-lime-400">CLUB</span></span>
           </button>
 
-          <button 
-            onClick={() => setActivePage('woodiq')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all duration-300 font-bold text-sm ${
-              activePage === 'woodiq'
-                ? 'bg-amber-500/20 border border-amber-400/50 text-white shadow-[0_0_15px_rgba(251,191,36,0.15)]'
-                : 'text-zinc-400 hover:text-white bg-zinc-900/50 border border-zinc-800/80'
-            }`}
-          >
-          
-            <span>WOOD<span className="text-amber-400">IQ</span></span>
-          </button>
+     <button
+  onClick={() => setActivePage('woodiq')}
+  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all duration-300 font-bold text-sm ${
+    activePage === 'woodiq'
+      ? 'bg-amber-500/20 border border-amber-400/50 text-white shadow-[0_0_15px_#FBECD0]'
+      : 'text-zinc-400 hover:text-white bg-zinc-900/50 border border-zinc-800/80'
+  }`}
+>
+  <span className="flex items-center justify-center w-6 h-6 shrink-0">
+    <img
+      src={woodiqLogo}
+      alt="WOODIQ"
+      className="w-6 h-6 object-contain"
+    />
+  </span>
+
+  <span>
+    WOOD<span className="text-amber-400 ">IQ</span>
+  </span>
+</button>
         </div>
 
         {/* Section Anchors */}

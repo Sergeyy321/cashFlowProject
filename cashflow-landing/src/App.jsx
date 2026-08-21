@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { doc, onSnapshot, db } from './firebase/FireBase'
-
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { Benefits } from './components/Benefits'
@@ -11,15 +9,13 @@ import { Footer } from './components/Footer'
 import { BookingModal } from './components/BookingModal'
 import { GameProcess } from './components/TimeLine'
 import { SchedulePricing } from './components/Schedule'
-import { AdminPanel } from './components/AdminPanel'
-
 import { HeroWoodIQ } from './components/HeroWoodIQ'
 import { WoodIQCatalog } from './components/WoodIQCatalog'
 import { FAQGames } from './components/FAQGames'
 import { WoodIQRentals } from './components/WoodIQRental'
 import { WoodIQSelling } from './components/WoodIQSelling'
 import { WoodIQOrderModal } from './components/WoodIQOrderModal'
-
+import { getSiteSettings } from './components/api/settings'
 import { ProductSwitcher } from './components/ProductSwitcher'
 
 
@@ -43,6 +39,7 @@ const getPageFromPath = () => {
 // ==========================================
 
 export default function App() {
+
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -80,31 +77,25 @@ export default function App() {
   // FIREBASE
   // ==========================================
 
-  useEffect(() => {
+ useEffect(() => {
+  async function loadSettings() {
+    try {
+      const data = await getSiteSettings()
 
-    const unsubscribe = onSnapshot(
-      doc(db, 'settings', 'main'),
-      (snap) => {
+      setPrices(data.prices)
+      setEventDetails({
+        date: `${data.event.date}, ${data.event.time}`,
+        place: data.event.place,
+        spots: data.event.spots,
+      })
 
-        if (snap.exists()) {
+    } catch (error) {
+      console.error('Ошибка загрузки настроек:', error)
+    }
+  }
 
-          const data = snap.data()
-
-          if (data.prices) {
-            setPrices(data.prices)
-          }
-
-          if (data.event) {
-            setEventDetails(data.event)
-          }
-
-        }
-      }
-    )
-
-    return () => unsubscribe()
-
-  }, [])
+  loadSettings()
+}, [])
 
 
   // ==========================================
@@ -160,7 +151,7 @@ export default function App() {
 
       window.scrollTo({
         top: 0,
-        behavior: 'smooth',
+ behavior: 'instant',
       })
 
     }
@@ -355,10 +346,6 @@ export default function App() {
           Только Cashflow
       ====================================== */}
 
-      {activePage === 'cashflow' && (
-        <AdminPanel />
-      )}
-
 
       {/* ======================================
           CASHFLOW MODAL
@@ -385,14 +372,12 @@ export default function App() {
           PRODUCT SWITCHER
       ====================================== */}
 
-      <ProductSwitcher
-
-        activePage={activePage}
-
-        setActivePage={setActivePage}
-
-      />
-
+  {!isModalOpen && (
+  <ProductSwitcher
+    activePage={activePage}
+    setActivePage={setActivePage}
+  />
+)}
 
       {/* ======================================
           WOODIQ MODAL

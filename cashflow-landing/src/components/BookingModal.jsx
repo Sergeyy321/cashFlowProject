@@ -137,17 +137,19 @@ const calculatePrice = () => {
         city
       );
 
-      formData.append(
-        "tier",
-        selectedTier || "general"
-      );
+formData.append(
+  "tier",
+  participants === 1
+    ? "1"
+    : "2"
+);
 
       formData.append(
         "participants",
         participants
       );
 
-    const url = import.meta.env.VITE_apiKey;
+    const url = import.meta.env.VITE_URL;
 
 const response = await fetch(url, {
   method: "POST",

@@ -16,7 +16,7 @@ export function HeroWoodIQ({ onOpenModal, setActivePage }) {
             Аренда рефлекторных деревянных аттракционов ручной работы для корпоративов, свадеб, фестивалей и семейных праздников.
           </p> {/* Кнопки */} <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <button type="button" onClick={() => onOpenModal('woodiq_rental')} className="rounded-xl bg-amber-400 px-8 py-4 text-base font-bold text-zinc-950 shadow-[0_0_30px_rgba(251,191,36,0.3)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_40px_rgba(251,191,36,0.45)]" > Заказать на мероприятие </button>
-            <button type="button" onClick={() => setActivePage('cashflow')} className="rounded-xl border border-white/30 bg-black/40 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/60 hover:bg-black/60" > 💸 Перейти к Cashflow </button>
+
           </div> {/* Нижняя подпись */} <div className="mt-10 flex items-center justify-center gap-2 text-sm text-white/70"> <span className="h-2 w-2 animate-pulse rounded-full bg-amber-300" /> <span>Деревянные игры ручной работы</span> </div> </div> </div> {/* ========================= ПЛАВНЫЙ ПЕРЕХОД В СЛЕДУЮЩУЮ СЕКЦИЮ ========================== */}
       <div className="absolute bottom-0 left-0 right-0 z-20 h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" /> </section>
   );

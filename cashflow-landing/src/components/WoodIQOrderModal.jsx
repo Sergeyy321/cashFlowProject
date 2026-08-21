@@ -259,7 +259,7 @@ export function WoodIQOrderModal({
       )
 
 
-      const url = import.meta.env.VITE_apiKey
+      const url = import.meta.env.VITE_URL
 const response = await fetch(url, {
   method: 'POST',
   body: formData,
@@ -380,13 +380,10 @@ if (!response.ok) {
               <div className="mb-7 pr-12">
 
                 <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#96764d]">
-                  WOOD IQ
+                    WOOD IQ  Заказать игры
                 </div>
 
-                <h2 className="font-serif text-3xl font-bold sm:text-4xl">
-                  Заказать игры
-                </h2>
-
+              
                 <p className="mt-2 text-sm leading-6 text-[#756b5e]">
                   Выберите формат, количество игр и
                   город. Стоимость рассчитывается автоматически.
