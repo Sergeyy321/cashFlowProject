@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/cashflow",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cashflow/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}

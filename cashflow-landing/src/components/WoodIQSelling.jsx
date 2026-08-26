@@ -130,95 +130,42 @@ const rentals = [
         </div>
 
         {/* Карточки */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {rentals.map((game, index) => (
-            <div
-              key={index}
-              className="group overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-amber-400/50 transition-all duration-300 hover:-translate-y-1"
-            >
-              {/* Картинка */}
-              <button
-                type="button"
-                onClick={() => setSelectedGame(game)}
-                className="relative block w-full h-56 overflow-hidden"
-              >
-                <img
-                  src={game.image}
-                  alt={game.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+    {/* Галерея */}
+<div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+  {rentals.map((game, index) => (
+    <button
+      key={index}
+      type="button"
+      onClick={() => setSelectedGame(game)}
+      className="group relative flex-none w-64 h-72 overflow-hidden rounded-2xl snap-start border border-zinc-800 hover:border-amber-400/60 transition-all duration-300"
+    >
+      <img
+        src={game.image}
+        alt={game.name}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
 
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all" />
+      {/* Затемнение */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
-                <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-zinc-950/80 border border-amber-400/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
-                  {game.tag}
-                </span>
+      {/* Категория */}
+      <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-zinc-950/80 border border-amber-400/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+        {game.tag}
+      </span>
 
-                <span className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-zinc-950/80 border border-zinc-700 flex items-center justify-center text-white">
-                  🔍
-                </span>
-              </button>
+      {/* Название */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
+        <h3 className="text-lg font-bold text-white">
+          {game.name}
+        </h3>
 
-              {/* Информация */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-3">
-                  {game.name}
-                </h3>
-
-                <p className="text-zinc-400 text-xs leading-relaxed mb-5">
-                  {game.description}
-                </p>
-
-                {/* Что входит */}
-                <div className="mb-6">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-3">
-                    В комплекте
-                  </p>
-
-                  <div className="space-y-2">
-                    {game.features.map((feature, featureIndex) => (
-                      <div
-                        key={featureIndex}
-                        className="flex items-center gap-2 text-xs text-zinc-300"
-                      >
-                        <span className="text-amber-400">✓</span>
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Цена */}
-                <div className="flex items-end justify-between mb-2">
-                  <div>
-              
-                  </div>
-                    </div>
-                         {/* <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                      Покупка
-
-                    </span>
-                        <div className="text-xl font-extrabold text-white">
-                      {game.sale}     
-                 
-                    
-                  </div> */}
-
-               
-                
-
-                {/* Кнопка */}
-                <button
-                  type="button"
-                onClick={() => onOpenModal('woodiq_rental', game.name)}
-                  className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition-all"
-                >
-                  Забронировать / Купить
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <span className="inline-block mt-2 text-xs text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">
+          Нажмите для просмотра →
+        </span>
+      </div>
+    </button>
+  ))}
+</div>
 
         {/* Дополнительная информация */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
