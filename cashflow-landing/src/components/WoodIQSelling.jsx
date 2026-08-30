@@ -74,15 +74,15 @@ export function WoodIQSelling({ onOpenModal }) {
           ))}
         </div>
 
-        {/* Галерея игр */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Галерея игр: ряд с горизонтальным скроллом на телефоне, сетка на десктопе */}
+        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
           {filteredGames.map((game, index) => {
             const inCart = isInCart(game.id || game.name);
 
             return (
               <div
                 key={game.id || index}
-                className="group relative h-96 overflow-hidden rounded-3xl border border-zinc-800 hover:border-amber-400/60 transition-all duration-300 flex flex-col justify-end text-left shadow-lg bg-zinc-900"
+                className="group relative flex-none w-[82vw] max-w-[300px] sm:w-auto h-96 overflow-hidden rounded-3xl border border-zinc-800 hover:border-amber-400/60 transition-all duration-300 flex flex-col justify-end text-left shadow-lg bg-zinc-900 snap-center"
               >
                 <img
                   src={game.image}

@@ -10,9 +10,13 @@ export function WoodIQCatalog({ onOpenModal }) {
   const ws = t.woodSelling;
   const { isInCart, toggleCart } = useCart();
 
-  // Первые 3 самые популярные игры
-  const top3Games = ws.games.slice(0, 3).map((g, idx) => {
-    const meta = WOOD_GAMES_METADATA[idx];
+  // 3 выбранные популярные игры: Магніти, Еластик, IQ Puzzle
+  const popularIds = ['magnets', 'elasticBall', 'iqPuzzle'];
+
+  const popularGames = popularIds.map((id) => {
+    const metaIndex = WOOD_GAMES_METADATA.findIndex((m) => m.id === id);
+    const meta = WOOD_GAMES_METADATA[metaIndex] || WOOD_GAMES_METADATA[0];
+    const g = ws.games[metaIndex] || ws.games[0];
     return {
       id: meta.id,
       name: g.name,
@@ -42,15 +46,15 @@ export function WoodIQCatalog({ onOpenModal }) {
             </p>
           </div>
 
-          {/* Сетка ТОП-3 популярных игр */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {top3Games.map((g) => {
+          {/* Галерея ТОП-3 популярных игр: ряд со скроллом на мобильном, сетка на десктопе */}
+          <div className="flex sm:grid sm:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+            {popularGames.map((g) => {
               const inCart = isInCart(g.id || g.name);
 
               return (
                 <div
                   key={g.id}
-                  className="relative p-[1px] rounded-3xl bg-gradient-to-br from-amber-400/40 via-amber-500/10 to-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(245,158,11,0.12)] flex flex-col"
+                  className="group relative flex-none w-[82vw] max-w-[300px] sm:w-auto p-[1px] rounded-3xl bg-gradient-to-br from-amber-400/40 via-amber-500/10 to-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(245,158,11,0.12)] flex flex-col snap-center"
                 >
                   <div className="relative h-full rounded-[23px] bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 p-6 flex flex-col justify-between overflow-hidden">
                     {/* Декоративное свечение */}
@@ -120,7 +124,7 @@ export function WoodIQCatalog({ onOpenModal }) {
                         {g.name}
                       </h3>
 
-                      <p className="text-zinc-400 text-xs leading-5 mb-5">
+                      <p className="text-zinc-400 text-xs leading-5 mb-5 line-clamp-3">
                         {g.desc}
                       </p>
                     </div>

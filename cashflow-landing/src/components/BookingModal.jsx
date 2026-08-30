@@ -212,7 +212,14 @@ export function BookingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          handleCloseAndReset();
+        }
+      }}
+    >
       <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(0,0,0,0.7)] max-h-[90vh] overflow-y-auto">
         <button
           onClick={handleCloseAndReset}
