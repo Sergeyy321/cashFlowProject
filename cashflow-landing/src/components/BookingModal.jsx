@@ -26,10 +26,14 @@ export function BookingModal({
   isOpen,
   onClose,
   initialParticipants = 1,
+  selectedTier = 'test',
+  customPrices,
 }) {
   const { t } = useLanguage();
-  const bm = t.bookingModal;
-  const hp = t.heroPricing;
+  const bm = t.bookingModal || {};
+
+  const singlePrice = customPrices?.test || 120;
+  const doublePrice = customPrices?.combo || 200;
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+48 ");
@@ -64,6 +68,14 @@ export function BookingModal({
 
     setOpenedAt(Date.now());
     setHoneypot("");
+    setStatus({ type: null, message: "" });
+    setFieldErrors({});
+
+    if (selectedTier === 'combo') {
+      setParticipants(2);
+    } else {
+      setParticipants(initialParticipants || 1);
+    }
 
     fetch(`${import.meta.env.VITE_URL}?action=getPlaces`)
       .then((res) => res.json())
@@ -75,11 +87,7 @@ export function BookingModal({
       .catch((err) => {
         console.error("Ошибка при получении мест:", err);
       });
-  }, [isOpen]);
-
-  useEffect(() => {
-    setParticipants(initialParticipants);
-  }, [initialParticipants]);
+  }, [isOpen, selectedTier, initialParticipants]);
 
   if (!isOpen) return null;
 
@@ -115,8 +123,6 @@ export function BookingModal({
   };
 
   const calculatePrice = () => {
-    const singlePrice = hp.singlePriceNum || 150;
-    const doublePrice = hp.doublePriceNum || 250;
     return participants === 2 ? doublePrice : singlePrice;
   };
 
@@ -179,7 +185,7 @@ export function BookingModal({
       // Бот попался в скрытую ловушку (honeypot): имитируем успех, не засоряя Google Таблицу
       setStatus({
         type: "success",
-        message: bm.successDesc,
+        message: bm.successDesc || "Заявку надіслано!",
       });
       setTimeout(() => {
         handleCloseAndReset();
@@ -200,7 +206,7 @@ export function BookingModal({
     if (placesLeft !== null && placesLeft <= 0) {
       setStatus({
         type: "error",
-        message: bm.closedBtn,
+        message: bm.closedBtn || "Місць немає",
       });
       return;
     }
@@ -208,7 +214,7 @@ export function BookingModal({
     if (placesLeft !== null && participants > placesLeft) {
       setStatus({
         type: "error",
-        message: bm.errorSpots.replace('{spots}', placesLeft),
+        message: (bm.errorSpots || 'Залишилося лише {spots} місць').replace('{spots}', placesLeft.toString()),
       });
       return;
     }
@@ -243,7 +249,7 @@ export function BookingModal({
 
       setStatus({
         type: "success",
-        message: bm.successDesc,
+        message: bm.successDesc || "Заявку надіслано!",
       });
 
       setTimeout(() => {
@@ -252,7 +258,7 @@ export function BookingModal({
     } catch {
       setStatus({
         type: "error",
-        message: bm.errorGeneral,
+        message: bm.errorGeneral || "Помилка відправки",
       });
     } finally {
       setLoading(false);
@@ -294,34 +300,34 @@ export function BookingModal({
             </div>
 
             <h3 className="text-2xl font-bold text-white mb-3">
-              {bm.successTitle}
+              {bm.successTitle || "Заявку надіслано!"}
             </h3>
 
             <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-              {bm.successDesc}
+              {bm.successDesc || "Дякуємо! Ми зв'яжемося з вами найближчим часом."}
             </p>
 
             <button
               onClick={handleCloseAndReset}
               className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition cursor-pointer"
             >
-              {bm.closeBtn}
+              {bm.closeBtn || "Закрити"}
             </button>
           </div>
         ) : (
           <>
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-white mb-1">
-                {bm.title}
+                {bm.title || "Забронювати місце"}
               </h3>
               <p className="text-zinc-400 text-sm">
-                {bm.subtitle}
+                {bm.subtitle || "Заповніть форму, і ми зв’яжемося з вами."}
               </p>
 
               {placesLeft !== null && (
                 <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-xs">
                   <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
-                  <span className="text-zinc-400">{bm.freeSpots}:</span>
+                  <span className="text-zinc-400">{bm.freeSpots || "Вільних місць"}:</span>
                   <span className="font-bold text-lime-400">{placesLeft}</span>
                 </div>
               )}
@@ -350,7 +356,7 @@ export function BookingModal({
               {/* ВЫБОР ПЛАНА */}
               <div>
                 <label className="block text-xs uppercase font-bold text-zinc-400 mb-1.5">
-                  {bm.planLabel}
+                  {bm.planLabel || "Вибір плану"}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -362,8 +368,8 @@ export function BookingModal({
                         : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                     }`}
                   >
-                    <div className="font-bold text-sm leading-tight mb-1">{bm.participant1}</div>
-                    <div className="text-xs text-lime-400 font-extrabold">{hp.singlePrice}</div>
+                    <div className="font-bold text-sm leading-tight mb-1">{bm.participant1 || "1 учасник"}</div>
+                    <div className="text-xs text-lime-400 font-extrabold">{singlePrice} zł</div>
                   </button>
 
                   <button
@@ -375,8 +381,8 @@ export function BookingModal({
                         : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                     }`}
                   >
-                    <div className="font-bold text-sm leading-tight mb-1">{bm.participant2}</div>
-                    <div className="text-xs text-lime-400 font-extrabold">{hp.doublePrice}</div>
+                    <div className="font-bold text-sm leading-tight mb-1">{bm.participant2 || "2 учасники"}</div>
+                    <div className="text-xs text-lime-400 font-extrabold">{doublePrice} zł</div>
                   </button>
                 </div>
               </div>
@@ -385,7 +391,7 @@ export function BookingModal({
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs uppercase font-bold text-zinc-400">
-                    {bm.nameLabel} <span className="text-rose-400">*</span>
+                    {bm.nameLabel || "Ім'я"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.name && (
                     <span className="text-xs font-bold text-rose-400 animate-bounce">
@@ -404,7 +410,7 @@ export function BookingModal({
                       setFieldErrors((prev) => ({ ...prev, name: "" }));
                     }
                   }}
-                  placeholder={bm.namePlaceholder}
+                  placeholder={bm.namePlaceholder || "Олександр"}
                   className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-200 ${
                     fieldErrors.name
                       ? "border-2 border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
@@ -417,7 +423,7 @@ export function BookingModal({
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs uppercase font-bold text-zinc-400">
-                    {bm.phoneLabel} <span className="text-rose-400">*</span>
+                    {bm.phoneLabel || "Телефон"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.phone && (
                     <span className="text-xs font-bold text-rose-400 animate-bounce">
@@ -442,7 +448,7 @@ export function BookingModal({
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs uppercase font-bold text-zinc-400">
-                    {bm.contactLabel} <span className="text-rose-400">*</span>
+                    {bm.contactLabel || "Месенджер"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.messenger && (
                     <span className="text-xs font-bold text-rose-400 animate-bounce">
@@ -493,7 +499,7 @@ export function BookingModal({
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs uppercase font-bold text-zinc-400">
-                    {bm.cityLabel} <span className="text-rose-400">*</span>
+                    {bm.cityLabel || "Місто"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.city && (
                     <span className="text-xs font-bold text-rose-400 animate-bounce">
@@ -527,13 +533,13 @@ export function BookingModal({
               {/* ИТОГОВАЯ СТОИМОСТЬ */}
               <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex justify-between items-center">
                 <div>
-                  <span className="text-xs text-zinc-400 block">{bm.participantsSummary}</span>
+                  <span className="text-xs text-zinc-400 block">{bm.participantsSummary || "Учасники"}</span>
                   <span className="text-sm font-bold text-white">
-                    {participants === 2 ? bm.participant2 : bm.participant1}
+                    {participants === 2 ? (bm.participant2 || "2 учасники") : (bm.participant1 || "1 учасник")}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-zinc-400 block">{bm.costSummary}</span>
+                  <span className="text-xs text-zinc-400 block">{bm.costSummary || "Вартість"}</span>
                   <span className="text-xl font-bold text-lime-400">
                     {calculatePrice()} zł
                   </span>
@@ -547,10 +553,10 @@ export function BookingModal({
                 className="w-full py-4 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-black rounded-xl transition duration-200 shadow-[0_0_25px_rgba(163,230,53,0.3)] hover:shadow-[0_0_35px_rgba(163,230,53,0.4)] cursor-pointer"
               >
                 {loading
-                  ? bm.sendingBtn
+                  ? (bm.sendingBtn || "Надсилання...")
                   : placesLeft !== null && placesLeft <= 0
-                  ? bm.closedBtn
-                  : bm.submitBtn}
+                  ? (bm.closedBtn || "Реєстрація закрита")
+                  : (bm.submitBtn || "Забронювати")}
               </button>
             </form>
           </>
