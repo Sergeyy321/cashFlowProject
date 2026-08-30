@@ -467,9 +467,18 @@ export const translations = {
       ],
       firstHourLabel: 'Pierwsza godzina',
       nextHourLabel: 'Każda kolejna godzina',
-      hoursCount: 'Liczba godzin',
+      hoursCount: 'Czas trwania (godziny)',
       hourUnit: 'godz.',
       turnkeyBookBtn: 'Zarezerwuj obsługę pod klucz',
+      managerContactNote: "W celu ustalenia szczegółów i potwierdzenia zamówienia skontaktuje się z Tobą nasz menedżer",
+      firstHourShort: '1 godz',
+      nextHourShort: 'dalej',
+      perHourShort: 'zł/godz',
+      includedServices: {
+        delivery: 'Dostawa i montaż strefy gier',
+        staff: 'Technicy i animatorzy na miejscu',
+        cleanup: 'Demontaż i wywóz gier',
+      },
       services: [
         {
           title: 'Dostawa i montaż gier',
@@ -1114,9 +1123,18 @@ export const translations = {
       ],
       firstHourLabel: 'Перша година',
       nextHourLabel: 'Кожна наступна година',
-      hoursCount: 'Тривалість (годин)',
+      hoursCount: 'Тривалість заходу (годин)',
       hourUnit: 'год.',
       turnkeyBookBtn: 'Замовити обслуговування під ключ',
+      managerContactNote: "Для уточнення деталей та підтвердження замовлення менеджер з вами зв'яжеться",
+      firstHourShort: '1 год',
+      nextHourShort: 'далі',
+      perHourShort: 'zł/год',
+      includedServices: {
+        delivery: 'Доставка та монтаж зони',
+        staff: 'Техніки та аніматори на місці',
+        cleanup: 'Демонтаж та вивезення',
+      },
       services: [
         {
           title: 'Доставка та монтаж ігор',
@@ -1763,6 +1781,15 @@ export const translations = {
       hoursCount: 'Event Duration (hours)',
       hourUnit: 'hrs',
       turnkeyBookBtn: 'Book Turnkey Service',
+      managerContactNote: 'Our manager will contact you to clarify details and confirm your booking',
+      firstHourShort: '1st hr',
+      nextHourShort: 'next',
+      perHourShort: 'zł/hr',
+      includedServices: {
+        delivery: 'Zone delivery & game setup',
+        staff: 'On-site technicians & animators',
+        cleanup: 'Tear-down & return pickup',
+      },
       services: [
         {
           title: 'Delivery & Setup',

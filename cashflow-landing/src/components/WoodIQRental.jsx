@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export function WoodIQRentals({ onOpenModal }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const wr = t.woodRental;
 
   // Режим калькулятора: 'daily' (посуточная) или 'turnkey' (под ключ по часам)
@@ -37,6 +37,31 @@ export function WoodIQRentals({ onOpenModal }) {
 
   const handleBooking = (format, title) => {
     onOpenModal?.(format, title);
+  };
+
+  // Локализация выпадающего списка часов
+  const getLocalizedHourLabel = (h) => {
+    if (lang === 'pl') {
+      if (h === 1) return `1 godzina (1 ${wr.hourUnit || 'godz.'})`;
+      if (h >= 2 && h <= 4) return `${h} godziny (${h} ${wr.hourUnit || 'godz.'})`;
+      return `${h} godzin (${h} ${wr.hourUnit || 'godz.'})`;
+    }
+    if (lang === 'en') {
+      if (h === 1) return `1 hour (1 ${wr.hourUnit || 'hr'})`;
+      return `${h} hours (${h} ${wr.hourUnit || 'hrs'})`;
+    }
+    // ukrainian default
+    if (h === 1) return `1 година (1 ${wr.hourUnit || 'год.'})`;
+    if (h >= 2 && h <= 4) return `${h} години (${h} ${wr.hourUnit || 'год.'})`;
+    return `${h} годин (${h} ${wr.hourUnit || 'год.'})`;
+  };
+
+  // Локализация вариантов пакетов
+  const getLocalizedTierOption = (tier) => {
+    const firstLabel = wr.firstHourShort || '1 год';
+    const nextLabel = wr.nextHourShort || 'далі';
+    const perHour = wr.perHourShort || 'zł/год';
+    return `${tier.title} (${firstLabel}: ${tier.firstHour} zł | ${nextLabel}: +${tier.nextHour} ${perHour})`;
   };
 
   return (
@@ -123,85 +148,82 @@ export function WoodIQRentals({ onOpenModal }) {
                   <div className="flex flex-wrap items-center justify-between gap-2 bg-[#f4ebdc] p-3.5 rounded-2xl border border-[#decbb4] text-xs font-semibold text-[#5a4835]">
                     <span className="font-bold text-[#3d362e]">{wr.turnkeyRules?.title || 'Правила розрахунку:'}</span>
                     <span className="bg-white/80 px-2.5 py-1 rounded-lg border border-[#e2d5c3]">
-                      {wr.turnkeyRules?.jenga || '🧱 Mega Jenga = 2 гри'}
+                      {wr.turnkeyRules?.jenga || '🧱 Велика Дженга = 2 гри'}
                     </span>
                     <span className="bg-white/80 px-2.5 py-1 rounded-lg border border-[#e2d5c3]">
                       {wr.turnkeyRules?.iqPuzzle || '🧩 IQ Puzzle (5 шт.) = 1 гра'}
                     </span>
                   </div>
 
-                  {/* Выбор пакета / набора игр */}
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653] block mb-3">
-                      {wr.gamesCount || 'Кількість ігор'}
-                    </label>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                      {turnkeyPrices.map((tier) => (
-                        <button
-                          key={tier.id}
-                          type="button"
-                          onClick={() => setSelectedTurnkeyTier(tier.id)}
-                          className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            selectedTurnkeyTier === tier.id
-                              ? 'border-[#3d362e] bg-[#3d362e] text-[#f7f0e5] shadow-md scale-[1.02]'
-                              : 'border-[#ded1bd] bg-[#fbf7f0] hover:border-[#b99a70] text-[#302b26]'
-                          }`}
-                        >
-                          <div className="font-extrabold text-sm mb-1 flex items-center justify-between">
-                            <span>{tier.title}</span>
-                            {tier.popular && (
-                              <span className="text-[10px] font-bold bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded">
-                                MAX
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs opacity-85 leading-tight">
-                            <span>1 год: <strong className="font-bold">{tier.firstHour} zł</strong></span>
-                            <span className="mx-1">•</span>
-                            <span>далі: <strong className="font-bold">+{tier.nextHour} zł/год</strong></span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Выбор длительности (Часы) */}
-                  <div className="rounded-2xl border border-[#ded1bd] bg-[#f8f3eb] p-4 sm:p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653]">
-                        {wr.hoursCount || 'Тривалість (годин)'}
-                      </span>
-                      <span className="text-xs font-semibold text-[#8b6d47]">
-                        {turnkeyHours} {wr.hourUnit || 'год.'}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-5 gap-2 mb-4">
-                      {[1, 2, 3, 4, 5].map((h) => (
-                        <button
-                          key={h}
-                          type="button"
-                          onClick={() => setTurnkeyHours(h)}
-                          className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-                            turnkeyHours === h
-                              ? 'bg-[#3d362e] text-[#f7f0e5] shadow-sm'
-                              : 'bg-white border border-[#ded1bd] text-[#554a3e] hover:border-[#b99a70]'
-                          }`}
-                        >
-                          {h} {wr.hourUnit || 'год'}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Итоговая строка цены под ключ */}
-                    <div className="flex items-center justify-between rounded-xl bg-[#3d362e] px-5 py-4 text-[#f7f0e5]">
+                  {/* Блок селектов: Количество игр и Длительность в часах */}
+                  <div className="rounded-2xl border border-[#ded1bd] bg-[#f8f3eb] p-5 sm:p-6 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                      
+                      {/* 1. Селект количества игр (пакет) */}
                       <div>
-                        <div className="text-[10px] uppercase tracking-wider text-[#cdbb9f]">
+                        <label
+                          htmlFor="turnkey-games-select"
+                          className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653] block mb-2"
+                        >
+                          {wr.gamesCount || 'Кількість ігор'}
+                        </label>
+
+                        <div className="relative">
+                          <select
+                            id="turnkey-games-select"
+                            value={selectedTurnkeyTier}
+                            onChange={(e) => setSelectedTurnkeyTier(e.target.value)}
+                            className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3.5 pr-10 text-sm font-bold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-sm"
+                          >
+                            {turnkeyPrices.map((tier) => (
+                              <option key={tier.id} value={tier.id}>
+                                {getLocalizedTierOption(tier)}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] text-sm">
+                            ▾
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 2. Селект длительности в часах */}
+                      <div>
+                        <label
+                          htmlFor="turnkey-hours-select"
+                          className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653] block mb-2"
+                        >
+                          {wr.hoursCount || 'Тривалість заходу'}
+                        </label>
+
+                        <div className="relative">
+                          <select
+                            id="turnkey-hours-select"
+                            value={turnkeyHours}
+                            onChange={(e) => setTurnkeyHours(Number(e.target.value))}
+                            className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3.5 pr-10 text-sm font-bold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-sm"
+                          >
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
+                              <option key={h} value={h}>
+                                {getLocalizedHourLabel(h)}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] text-sm">
+                            ▾
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Итоговая плашка цены */}
+                    <div className="flex items-center justify-between rounded-xl bg-[#3d362e] px-5 py-4 text-[#f7f0e5] shadow-inner">
+                      <div>
+                        <div className="text-[11px] uppercase tracking-wider text-[#cdbb9f] font-bold">
                           {selectedTurnkey?.title} ({turnkeyHours} {wr.hourUnit || 'год.'})
                         </div>
-                        <div className="text-xs text-[#b9aa96]">
-                          {wr.turnkeyBadge || 'Комплексне обслуговування'}
+                        <div className="text-xs text-[#b9aa96] mt-0.5">
+                          {wr.turnkeyBadge || 'Комплексне обслуговування "Під ключ"'}
                         </div>
                       </div>
 
@@ -215,15 +237,15 @@ export function WoodIQRentals({ onOpenModal }) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-[#6e5d4b]">
                     <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
                       <span>🚚</span>
-                      <span>Доставка та монтаж зони</span>
+                      <span>{wr.includedServices?.delivery || 'Доставка та монтаж зони'}</span>
                     </div>
                     <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
                       <span>👨‍🔧</span>
-                      <span>Техніки та аніматори на місці</span>
+                      <span>{wr.includedServices?.staff || 'Техніки та аніматори на місці'}</span>
                     </div>
                     <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
                       <span>🧹</span>
-                      <span>Демонтаж та вивезення</span>
+                      <span>{wr.includedServices?.cleanup || 'Демонтаж та вивезення'}</span>
                     </div>
                   </div>
 
@@ -241,6 +263,12 @@ export function WoodIQRentals({ onOpenModal }) {
                     <span>{wr.turnkeyBookBtn || 'Замовити обслуговування під ключ'}</span>
                     <span>→</span>
                   </button>
+
+                  {/* Примітка про зв'язок менеджера */}
+                  <div className="flex items-center justify-center gap-2 pt-1 text-center text-xs font-medium text-[#7a6b5a]">
+                    <span>📞</span>
+                    <span>{wr.managerContactNote || "Для уточнення деталей та підтвердження замовлення менеджер з вами зв'яжеться"}</span>
+                  </div>
                 </div>
               )}
 

@@ -232,7 +232,9 @@ export function BookingModal({
       formData.append("phone", "+" + digits);
       formData.append("messenger", fullMessenger);
       formData.append("city", UK_CITY_NAMES[city] || city);
-      formData.append("tier", participants === 2 ? "2 учасники (з другом)" : "1 учасник");
+      formData.append("tier", participants === 2 ? "2 учасники" : "1 учасник");
+      formData.append("type", participants === 2 ? "2 учасники" : "1 учасник");
+      formData.append("participants", participants.toString());
       formData.append("price", `${calculatePrice()} zł`);
 
       const response = await fetch(import.meta.env.VITE_URL, {
