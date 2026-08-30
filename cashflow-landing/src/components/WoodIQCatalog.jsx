@@ -104,7 +104,7 @@ export function WoodIQCatalog({ onOpenModal }) {
                         {/* Бейдж Mega Jenga */}
                         {g.isMegaJenga && (
                           <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-amber-400 text-zinc-950 font-black text-[10px] uppercase shadow">
-                            🧱 = 2 игры
+                            {t.cart.megaJengaBadge || '🧱 = 2'}
                           </div>
                         )}
                       </div>

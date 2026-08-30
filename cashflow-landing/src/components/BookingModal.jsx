@@ -1,75 +1,89 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { validateBotSafety, recordSuccessfulSubmission } from "../utils/antiBot";
+
+const cities = [
+  "Katowice",
+  "Kraków",
+  "Wrocław",
+  "Warszawa",
+  "Gdańsk",
+  "Poznań",
+  "Inne miasto / Other",
+];
+
+const UK_CITY_NAMES = {
+  'Katowice': 'Катовіце',
+  'Kraków': 'Краків',
+  'Wrocław': 'Вроцлав',
+  'Warszawa': 'Варшава',
+  'Gdańsk': 'Гданськ',
+  'Poznań': 'Познань',
+  'Inne miasto / Other': 'Інше місто',
+};
 
 export function BookingModal({
   isOpen,
   onClose,
-  defaultCity,
-  selectedTier,
-  customPrices,
-  prices
+  initialParticipants = 1,
 }) {
   const { t } = useLanguage();
   const bm = t.bookingModal;
-
-  const currentPrices = customPrices || prices || { test: 120, combo: 150 };
+  const hp = t.heroPricing;
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+48 ");
-  const [city, setCity] = useState(defaultCity || "Katowice");
   const [messengerPlatform, setMessengerPlatform] = useState("Telegram");
   const [messengerHandle, setMessengerHandle] = useState("");
-  const [participants, setParticipants] = useState(selectedTier === "combo" ? 2 : 1);
-
+  const [city, setCity] = useState("Katowice");
+  const [participants, setParticipants] = useState(initialParticipants);
+  const [loading, setLoading] = useState(false);
   const [placesLeft, setPlacesLeft] = useState(null);
+
+  // Anti-Bot & Anti-Spam state
+  const [honeypot, setHoneypot] = useState("");
+  const [openedAt, setOpenedAt] = useState(Date.now());
+
+  // Ошибки полей
   const [fieldErrors, setFieldErrors] = useState({});
+
   const [status, setStatus] = useState({
     type: null,
     message: "",
   });
-  const [loading, setLoading] = useState(false);
 
-  // Ссылки для автоматической прокрутки и фокуса к ошибочному полю
+  // Ссылки для плавной прокрутки и фокуса к проблемному полю
   const nameRef = useRef(null);
   const phoneRef = useRef(null);
+  const messengerRef = useRef(null);
   const cityRef = useRef(null);
 
+  // Загрузка оставшихся мест и фиксация времени открытия формы
   useEffect(() => {
     if (!isOpen) return;
 
-    setName("");
-    setPhone("+48 ");
-    setMessengerPlatform("Telegram");
-    setMessengerHandle("");
-    setParticipants(selectedTier === "combo" ? 2 : 1);
-    setFieldErrors({});
+    setOpenedAt(Date.now());
+    setHoneypot("");
 
-    setStatus({
-      type: null,
-      message: "",
-    });
+    fetch(`${import.meta.env.VITE_URL}?action=getPlaces`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.placesLeft === "number") {
+          setPlacesLeft(data.placesLeft);
+        }
+      })
+      .catch((err) => {
+        console.error("Ошибка при получении мест:", err);
+      });
+  }, [isOpen]);
 
-    if (defaultCity) {
-      setCity(defaultCity);
-    }
-
-    loadPlaces();
-  }, [isOpen, defaultCity, selectedTier]);
+  useEffect(() => {
+    setParticipants(initialParticipants);
+  }, [initialParticipants]);
 
   if (!isOpen) return null;
 
-  async function loadPlaces() {
-    try {
-      const response = await fetch(import.meta.env.VITE_URL);
-      const data = await response.json();
-      if (data.success && typeof data.placesLeft === 'number') {
-        setPlacesLeft(data.placesLeft);
-      }
-    } catch {
-      // Игнорируем ошибку при фоновой загрузке
-    }
-  }
-
+  // Форматирование телефона польского стандарта (+48 XXX XXX XXX)
   const handlePhoneChange = (e) => {
     let value = e.target.value;
 
@@ -84,9 +98,15 @@ export function BookingModal({
 
     let formatted = "+48 ";
 
-    if (numbers.length > 0) formatted += numbers.substring(0, 3);
-    if (numbers.length > 3) formatted += " " + numbers.substring(3, 6);
-    if (numbers.length > 6) formatted += " " + numbers.substring(6, 9);
+    if (numbers.length > 0) {
+      formatted += numbers.substring(0, 3);
+    }
+    if (numbers.length > 3) {
+      formatted += " " + numbers.substring(3, 6);
+    }
+    if (numbers.length > 6) {
+      formatted += " " + numbers.substring(6, 9);
+    }
 
     setPhone(formatted);
     if (fieldErrors.phone) {
@@ -95,8 +115,8 @@ export function BookingModal({
   };
 
   const calculatePrice = () => {
-    const singlePrice = Number(currentPrices.test) || 120;
-    const doublePrice = Number(currentPrices.combo) || 150;
+    const singlePrice = hp.singlePriceNum || 150;
+    const doublePrice = hp.doublePriceNum || 250;
     return participants === 2 ? doublePrice : singlePrice;
   };
 
@@ -108,17 +128,22 @@ export function BookingModal({
 
     // 1. Проверка имени
     if (!name || name.trim().length < 2) {
-      newErrors.name = bm.errorNameRequired || "Wprowadź swoje imię";
+      newErrors.name = bm.errorNameRequired || "Введіть ваше ім’я";
     }
 
     // 2. Проверка телефона
     if (digits.length !== 11) {
-      newErrors.phone = bm.errorPhoneRequired || "Wprowadź 9 cyfr numeru (+48 XXX XXX XXX)";
+      newErrors.phone = bm.errorPhoneRequired || "Введіть 9 цифр номера (+48 XXX XXX XXX)";
     }
 
-    // 3. Проверка города
+    // 3. Проверка соцсети / мессенджера (ОБЯЗАТЕЛЬНО)
+    if (!messengerHandle || messengerHandle.trim().length < 2) {
+      newErrors.messenger = bm.errorMessengerRequired || "Вкажіть ваш нікнейм або номер соцмережі";
+    }
+
+    // 4. Проверка города
     if (!city) {
-      newErrors.city = bm.errorCityRequired || "Wybierz miasto";
+      newErrors.city = bm.errorCityRequired || "Оберіть місто";
     }
 
     // Если есть ошибки — плавно прокручиваем к первой ошибке и ставим фокус
@@ -131,10 +156,42 @@ export function BookingModal({
       } else if (newErrors.phone) {
         phoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         phoneRef.current?.focus();
+      } else if (newErrors.messenger) {
+        messengerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        messengerRef.current?.focus();
       } else if (newErrors.city) {
         cityRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         cityRef.current?.focus();
       }
+      return;
+    }
+
+    // 5. КОМПЛЕКСНАЯ ANTI-BOT ЗАЩИТА
+    const botCheck = validateBotSafety({
+      honeypotValue: honeypot,
+      openedAt,
+      name,
+      phoneDigits: digits,
+      messengerHandle,
+    });
+
+    if (botCheck.silentReject) {
+      // Бот попался в скрытую ловушку (honeypot): имитируем успех, не засоряя Google Таблицу
+      setStatus({
+        type: "success",
+        message: bm.successDesc,
+      });
+      setTimeout(() => {
+        handleCloseAndReset();
+      }, 2500);
+      return;
+    }
+
+    if (botCheck.isBot && botCheck.error) {
+      setStatus({
+        type: "error",
+        message: botCheck.error,
+      });
       return;
     }
 
@@ -159,10 +216,8 @@ export function BookingModal({
     setLoading(true);
     setStatus({ type: null, message: "" });
 
-    // Форматируем соцсеть с приставкой: "Telegram: @nickname" или "Instagram: @nickname"
-    const fullMessenger = messengerHandle.trim()
-      ? `${messengerPlatform}: ${messengerHandle.trim()}`
-      : messengerPlatform;
+    // Форматируем соцсеть с приставкой: "Telegram: @nickname"
+    const fullMessenger = `${messengerPlatform}: ${messengerHandle.trim()}`;
 
     try {
       const formData = new URLSearchParams();
@@ -170,9 +225,9 @@ export function BookingModal({
       formData.append("name", name.trim());
       formData.append("phone", "+" + digits);
       formData.append("messenger", fullMessenger);
-      formData.append("city", city);
-      formData.append("tier", participants.toString());
-      formData.append("price", calculatePrice().toString());
+      formData.append("city", UK_CITY_NAMES[city] || city);
+      formData.append("tier", participants === 2 ? "2 учасники (з другом)" : "1 учасник");
+      formData.append("price", `${calculatePrice()} zł`);
 
       const response = await fetch(import.meta.env.VITE_URL, {
         method: "POST",
@@ -182,6 +237,9 @@ export function BookingModal({
       if (!response.ok) {
         throw new Error("Server error");
       }
+
+      // Фиксируем успешную отправку для rate-limiter
+      recordSuccessfulSubmission();
 
       setStatus({
         type: "success",
@@ -207,6 +265,7 @@ export function BookingModal({
     setName("");
     setPhone("+48 ");
     setMessengerHandle("");
+    setHoneypot("");
     setParticipants(1);
     onClose();
   };
@@ -238,55 +297,90 @@ export function BookingModal({
               {bm.successTitle}
             </h3>
 
-            <p className="text-zinc-400 mb-6">
+            <p className="text-zinc-400 text-sm leading-relaxed mb-6">
               {bm.successDesc}
             </p>
 
             <button
               onClick={handleCloseAndReset}
-              className="w-full py-3 rounded-xl bg-lime-400 text-zinc-950 font-bold hover:opacity-90 transition cursor-pointer"
+              className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition cursor-pointer"
             >
               {bm.closeBtn}
             </button>
           </div>
         ) : (
           <>
-            <h3 className="text-2xl font-bold text-white mb-2">
-              {bm.title}
-            </h3>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-white mb-1">
+                {bm.title}
+              </h3>
+              <p className="text-zinc-400 text-sm">
+                {bm.subtitle}
+              </p>
 
-            <p className="text-zinc-500 text-sm mb-6">
-              {bm.subtitle}
-            </p>
-
-            {placesLeft !== null && (
-              <div
-                className={`mb-5 rounded-xl p-4 border ${
-                  placesLeft > 0
-                    ? "border-lime-400/30 bg-lime-400/10"
-                    : "border-red-500/30 bg-red-500/10"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-300">{bm.freeSpots}</span>
-                  <span
-                    className={`font-bold text-lg ${
-                      placesLeft > 0 ? "text-lime-400" : "text-red-400"
-                    }`}
-                  >
-                    {placesLeft}
-                  </span>
+              {placesLeft !== null && (
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
+                  <span className="text-zinc-400">{bm.freeSpots}:</span>
+                  <span className="font-bold text-lime-400">{placesLeft}</span>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {status.type === "error" && (
-              <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/30 p-3 text-red-300 text-sm">
-                {status.message}
+              <div className="mb-6 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{status.message}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              {/* СКРЫТАЯ ЛОВУШКА ДЛЯ БОТОВ (HONEYPOT) */}
+              <input
+                type="text"
+                name="website_contact_confirm"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="opacity-0 absolute -top-[9999px] left-[9999px] h-0 w-0 pointer-events-none"
+              />
+
+              {/* ВЫБОР ПЛАНА */}
+              <div>
+                <label className="block text-xs uppercase font-bold text-zinc-400 mb-1.5">
+                  {bm.planLabel}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setParticipants(1)}
+                    className={`py-3 px-3 rounded-xl border text-left transition cursor-pointer ${
+                      participants === 1
+                        ? "bg-lime-400/10 border-lime-400 text-white"
+                        : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                    }`}
+                  >
+                    <div className="font-bold text-sm leading-tight mb-1">{bm.participant1}</div>
+                    <div className="text-xs text-lime-400 font-extrabold">{hp.singlePrice}</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setParticipants(2)}
+                    className={`py-3 px-3 rounded-xl border text-left transition cursor-pointer ${
+                      participants === 2
+                        ? "bg-lime-400/10 border-lime-400 text-white"
+                        : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                    }`}
+                  >
+                    <div className="font-bold text-sm leading-tight mb-1">{bm.participant2}</div>
+                    <div className="text-xs text-lime-400 font-extrabold">{hp.doublePrice}</div>
+                  </button>
+                </div>
+              </div>
+
               {/* ИМЯ */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
@@ -302,15 +396,15 @@ export function BookingModal({
                 <input
                   ref={nameRef}
                   type="text"
-                  maxLength={50}
-                  placeholder={bm.namePlaceholder}
                   value={name}
+                  maxLength={50}
                   onChange={(e) => {
                     setName(e.target.value);
                     if (fieldErrors.name) {
                       setFieldErrors((prev) => ({ ...prev, name: "" }));
                     }
                   }}
+                  placeholder={bm.namePlaceholder}
                   className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-200 ${
                     fieldErrors.name
                       ? "border-2 border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
@@ -344,11 +438,18 @@ export function BookingModal({
                 />
               </div>
 
-              {/* МЕССЕНДЖЕР: ВЫБОР СОЦСЕТИ + НИК / НОМЕР */}
+              {/* МЕССЕНДЖЕР: ВЫБОР СОЦСЕТИ + НИК / НОМЕР (ОБЯЗАТЕЛЬНО) */}
               <div>
-                <label className="block text-xs uppercase font-bold text-zinc-400 mb-1.5">
-                  {bm.contactLabel}
-                </label>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="block text-xs uppercase font-bold text-zinc-400">
+                    {bm.contactLabel} <span className="text-rose-400">*</span>
+                  </label>
+                  {fieldErrors.messenger && (
+                    <span className="text-xs font-bold text-rose-400 animate-bounce">
+                      ⚠️ {fieldErrors.messenger}
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                   <select
                     value={messengerPlatform}
@@ -363,17 +464,27 @@ export function BookingModal({
                   </select>
 
                   <input
+                    ref={messengerRef}
                     type="text"
                     value={messengerHandle}
-                    onChange={(e) => setMessengerHandle(e.target.value)}
+                    onChange={(e) => {
+                      setMessengerHandle(e.target.value);
+                      if (fieldErrors.messenger) {
+                        setFieldErrors((prev) => ({ ...prev, messenger: "" }));
+                      }
+                    }}
                     placeholder={
                       messengerPlatform === 'Instagram'
                         ? '@instagram_nick'
                         : messengerPlatform === 'Telegram'
                         ? '@telegram_nick'
-                        : bm.messengerHandlePlaceholder || '@username или номер'
+                        : bm.messengerHandlePlaceholder || '@username або номер'
                     }
-                    className="sm:col-span-3 rounded-xl bg-zinc-950 border border-zinc-800 px-3.5 py-3 text-white outline-none focus:border-lime-400 text-sm"
+                    className={`sm:col-span-3 rounded-xl bg-zinc-950 px-3.5 py-3 text-white outline-none text-sm transition-all ${
+                      fieldErrors.messenger
+                        ? "border-2 border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
+                        : "border border-zinc-800 focus:border-lime-400"
+                    }`}
                   />
                 </div>
               </div>
@@ -399,58 +510,41 @@ export function BookingModal({
                       setFieldErrors((prev) => ({ ...prev, city: "" }));
                     }
                   }}
-                  className={`w-full rounded-xl bg-zinc-950 px-3 py-3 text-white outline-none transition-all duration-200 cursor-pointer ${
+                  className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-200 cursor-pointer ${
                     fieldErrors.city
                       ? "border-2 border-rose-500 bg-rose-950/20"
                       : "border border-zinc-800 focus:border-lime-400"
                   }`}
                 >
-                  <option value="Katowice">Katowice</option>
-                  <option value="Kraków">Kraków</option>
-                  <option value="Wrocław">Wrocław</option>
-                  <option value="Warszawa">Warszawa</option>
+                  {cities.map((c) => (
+                    <option key={c} value={c} className="bg-zinc-900 text-white">
+                      {c}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* ВЫБОР ПЛАНА */}
-              <div>
-                <label className="block text-xs uppercase font-bold text-zinc-400 mb-1.5">
-                  {bm.planLabel}
-                </label>
-                <select
-                  value={participants}
-                  onChange={(e) => setParticipants(Number(e.target.value))}
-                  className="w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-3 text-white outline-none focus:border-lime-400 cursor-pointer"
-                >
-                  <option value={1}>
-                    {bm.participant1} — {currentPrices.test || 120} zł
-                  </option>
-                  <option value={2}>
-                    {bm.participant2} — {currentPrices.combo || 150} zł
-                  </option>
-                </select>
-              </div>
-
-              <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4">
-                <div className="flex justify-between mb-2">
-                  <span className="text-zinc-400">{bm.participantsSummary}</span>
-                  <span className="text-white font-bold">{participants}</span>
+              {/* ИТОГОВАЯ СТОИМОСТЬ */}
+              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex justify-between items-center">
+                <div>
+                  <span className="text-xs text-zinc-400 block">{bm.participantsSummary}</span>
+                  <span className="text-sm font-bold text-white">
+                    {participants === 2 ? bm.participant2 : bm.participant1}
+                  </span>
                 </div>
-
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">{bm.costSummary}</span>
-                  <span className="text-lime-400 font-bold text-xl">
+                <div className="text-right">
+                  <span className="text-xs text-zinc-400 block">{bm.costSummary}</span>
+                  <span className="text-xl font-bold text-lime-400">
                     {calculatePrice()} zł
                   </span>
                 </div>
               </div>
 
+              {/* КНОПКА ОТПРАВКИ */}
               <button
                 type="submit"
-                disabled={
-                  loading || (placesLeft !== null && placesLeft <= 0)
-                }
-                className="w-full py-4 rounded-xl bg-lime-400 text-zinc-950 font-bold hover:opacity-90 disabled:opacity-50 transition shadow-lg cursor-pointer"
+                disabled={loading || (placesLeft !== null && placesLeft <= 0)}
+                className="w-full py-4 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-black rounded-xl transition duration-200 shadow-[0_0_25px_rgba(163,230,53,0.3)] hover:shadow-[0_0_35px_rgba(163,230,53,0.4)] cursor-pointer"
               >
                 {loading
                   ? bm.sendingBtn
