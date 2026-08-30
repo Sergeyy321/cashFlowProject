@@ -1,53 +1,28 @@
+import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+
 export function GameProcess() {
-  const steps = [
-    {
-      time: "",
-      title: "Знакомство и сбор участников",
-      desc: "Знакомимся за чашкой кофе"
-    },
-    {
-      time: "90 - 100 минут",
-      title: "Первый часть игры",
-      desc: "Учимся сводить баланс, инвестировать свободные средства в акции и недвижимость, проживать кризисы."
-    },
-    {
-      time: "10 - 15 минут",
-      title: "Кофе-брейк и нетворкинг",
-      desc: "Неформальное общение участников. Обсуждаем первые инсайты, обмениваемся контактами."
-    },
-    {
-      time: "90 - 100 минут",
-      title: "Вторая часть игры",
-      desc: "Создаем пассивный доход, превышающий расходы. Покупаем крупные бизнесы и совершаем миллионные сделки."
-    },
-    {
-      time: "15 - 20 минут",
-      title: "Подвендение итогов и разбор финансовых паттернов",
-      desc: "Каждый игрок получает индивидуальный разбор своих финансовых паттернов от ведущего."
-    }
-  ];
+  const { t } = useLanguage();
+  const tm = t.timeline;
 
   return (
     <section id="process" className="py-24 px-6 bg-zinc-950">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-extrabold text-white mb-4">Как проходят 4 часа тренинга</h2>
-          <p className="text-zinc-400 max-w-xl mx-auto">Полноценная симуляция вашей финансовой жизни, разбитая на комфортные этапы.</p>
+          <h2 className="text-3xl font-extrabold text-white mb-4">{tm.title}</h2>
+          <p className="text-zinc-400 max-w-xl mx-auto">{tm.subtitle}</p>
         </div>
 
         <div className="relative border-l-2 border-emerald-500/20 ml-4 md:ml-32 space-y-12">
-          {steps.map((step, idx) => (
+          {tm.steps.map((step, idx) => (
             <div key={idx} className="relative pl-8 group">
-              <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-zinc-950 
-                              border-2 border-lime-400 group-hover:bg-lime-400 
-                              transition-colors duration-300" />
+              <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-zinc-950 border-2 border-lime-400 group-hover:bg-lime-400 transition-colors duration-300" />
               
               <div className="absolute -left-4 md:-left-32 top-0 hidden md:block w-24 text-right">
                 <span className="text-xs font-bold text-lime-400 uppercase tracking-wider">{step.time}</span>
               </div>
 
-              <div className="p-6 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl 
-                              group-hover:border-lime-500/20 transition-all duration-300">
+              <div className="p-6 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl group-hover:border-lime-500/20 transition-all duration-300">
                 <span className="text-xs font-bold text-lime-400 uppercase tracking-wider block md:hidden mb-2">
                   {step.time}
                 </span>

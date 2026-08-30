@@ -1,31 +1,102 @@
+import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+
 export function FAQ() {
-  const faqs = [
-    {
-      q: 'Нужны ли глубокие знания в экономике перед стартом?',
-      a: 'Абсолютно нет! Ведущий объясняет правила за 15-20 минут до начала партии, выдает бланки и наводящими вопросами сопровождает вас во время всей игры. 80% игроков приходят впервые.'
-    },
-    {
-      q: 'Где и когда собираются игровые столы?',
-      a: 'Игры проводятся в разные дни в ресторане или уютных коворкингах в Катовицах, Хожуве,  и других городах. Точное расписание мы присылаем индивидуально.'
-    },
-    {
-      q: 'Сколько длится игровая сессия?',
-      a: 'В среднем 4-5 часов: 20 минут теории и разбор правил, 3-4 часа чистой игры и 40 минут финального подведения итогов, разбора вашего поведения и нетворкинг.'
-    }
-  ];
+  const { t } = useLanguage();
+  const f = t.faq;
 
   return (
-    <section id="faq" className="py-24 px-6">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-extrabold text-white text-center mb-12">Ответы на популярные вопросы</h2>
-        <div className="space-y-4">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="p-6 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl">
-              <h3 className="text-base font-bold text-white mb-2">{faq.q}</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">{faq.a}</p>
-            </div>
+    <section id="faq" className="py-20 sm:py-24 px-4 sm:px-6 overflow-hidden">
+      <div className="max-w-4xl mx-auto">
+        
+        {/* Заголовок */}
+        <div className="text-center mb-10 sm:mb-14">
+          <p className="text-lime-400 text-xs sm:text-sm font-bold uppercase tracking-[0.25em] mb-3">
+            {f.badge}
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+            {f.title}
+          </h2>
+          <div className="mx-auto mt-5 h-px w-24 bg-gradient-to-r from-transparent via-lime-400 to-transparent" />
+        </div>
+
+        {/* МОБИЛЬНАЯ ВЕРСИЯ — ГОРИЗОНТАЛЬНАЯ ГАЛЕРЕЯ СО СВАЙПОМ */}
+        <div className="flex sm:hidden gap-5 overflow-x-auto snap-x snap-mandatory pb-6 -mx-4 px-4 scrollbar-hide">
+          {f.items.map((faq, idx) => (
+            <article
+              key={idx}
+              className="relative min-w-[88%] snap-center rounded-3xl p-[1px] bg-gradient-to-br from-lime-400/60 via-lime-500/20 to-zinc-800 shadow-[0_10px_40px_rgba(163,230,53,0.10)]"
+            >
+              <div className="relative h-full rounded-[23px] p-6 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 overflow-hidden flex flex-col justify-between">
+                {/* Декоративное свечение */}
+                <div className="absolute -top-16 -right-16 w-40 h-40 bg-lime-400/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div>
+                  {/* Номер */}
+                  <div className="relative flex items-center justify-between mb-6">
+                    <span className="flex items-center justify-center w-9 h-9 rounded-full border border-lime-400/30 bg-lime-400/10 text-lime-400 text-xs font-bold">
+                      0{idx + 1}
+                    </span>
+                  </div>
+
+                  {/* Вопрос */}
+                  <h3 className="relative text-lg font-extrabold leading-snug text-white mb-4">
+                    {faq.q}
+                  </h3>
+
+                  {/* Акцентная линия */}
+                  <div className="w-12 h-[2px] bg-gradient-to-r from-lime-400 to-transparent mb-5" />
+
+                  {/* Ответ */}
+                  <p className="relative text-[15px] leading-7 text-zinc-300">
+                    {faq.a}
+                  </p>
+                </div>
+              </div>
+            </article>
           ))}
         </div>
+
+        {/* ДЕСКТОПНАЯ ВЕРСИЯ */}
+        <div className="hidden sm:block space-y-5">
+          {f.items.map((faq, idx) => (
+            <article
+              key={idx}
+              className="relative p-[1px] rounded-3xl bg-gradient-to-r from-lime-400/40 via-zinc-700/30 to-zinc-800/80 transition-all duration-300 hover:from-lime-400/70 hover:via-lime-500/30 hover:shadow-[0_10px_40px_rgba(163,230,53,0.08)]"
+            >
+              <div className="rounded-[23px] bg-zinc-900/80 p-7">
+                <div className="flex items-start gap-5">
+                  <span className="shrink-0 flex items-center justify-center w-11 h-11 rounded-full border border-lime-400/30 bg-lime-400/10 text-lime-400 font-bold text-sm">
+                    0{idx + 1}
+                  </span>
+
+                  <div>
+                    <h3 className="text-lg font-extrabold text-white mb-3">
+                      {faq.q}
+                    </h3>
+
+                    <div className="w-14 h-[2px] bg-gradient-to-r from-lime-400 to-transparent mb-4" />
+
+                    <p className="text-zinc-300 leading-7 text-sm">
+                      {faq.a}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Подсказка свайпа для мобильных */}
+        <div className="flex sm:hidden justify-center items-center gap-2 mt-2">
+          <span className="text-[11px] text-zinc-500 uppercase tracking-widest">
+            {f.swipeHint}
+          </span>
+          <span className="text-lime-400 text-sm">
+            →
+          </span>
+        </div>
+
       </div>
     </section>
   );

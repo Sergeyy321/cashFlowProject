@@ -1,240 +1,273 @@
-import { useState } from 'react';
-
-import fiveInARow from '../img/fiveInARow.jpg';
-import django from '../img/django.jpg';
-import balanceDisk from '../img/balance.jpg';
-import aeroHockey from '../img/aeroHockey.jpg';
-import elasticBall from '../img/elasticBall.jpg';
-import memoryFortBoyard from '../img/memoryFortBoyard.jpg';
-import magnets from '../img/magnets.jpg';
-import kulbito from '../img/kulbito.jpg';
-import plynko from '../img/plynko.jpg';
+import React, { useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useCart } from '../context/CartContext';
+import { WOOD_GAMES_METADATA } from '../data/woodGames';
 
 export function WoodIQSelling({ onOpenModal }) {
   const [selectedGame, setSelectedGame] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const { t } = useLanguage();
+  const ws = t.woodSelling;
+  const { isInCart, toggleCart } = useCart();
 
-const rentals = [
-  {
-    name: 'Четыре в ряд',
-    description:
-      'Большая деревянная версия классической игры. Отличный вариант для соревнований на мероприятии, корпоративе или празднике.',
-    image: fiveInARow,
-    tag: 'Стратегия',
-    rental: '10',
-    sale: 'от 59€',
-    features: ['Большое игровое поле', 'Комплект фишек', 'Подходит для 2 игроков'],
-  },
-  {
-    name: 'Большая Дженга',
-    description:
-      'Гигантская деревянная башня для весёлых соревнований. Чем выше башня — тем сложнее сделать следующий ход.',
-    image: django,
-    tag: 'Веселье',
-    rental: 'от ',
-    sale: '259€',
-    features: ['Большие деревянные бруски', 'Устойчивая конструкция', 'Для компании'],
-  },
-  {
-    name: 'Баланс Диск',
-    description:
-      'Игра на ловкость и концентрацию. Участникам необходимо удержать элементы на диске и не допустить их падения.',
-    image: balanceDisk,
-    tag: 'Ловкость',
-    rental: 'от 15',
-    sale: '89€',
-    features: ['Деревянный диск', 'Набор элементов', 'Подходит для соревнований'],
-  },
-  {
-    name: 'Аэрохоккей',
-    description:
-      'Динамичная деревянная игра для двух участников. Соревнуйтесь в скорости, реакции и точности, стараясь забить шайбу сопернику.',
-    image: aeroHockey,
-    tag: 'Соревнование',
-    rental: '20',
-    sale: '119€',
-    features: ['Игровой стол', 'Шайбы и аксессуары', 'Для 2 игроков'],
-  },
-  {
-    name: 'Эластик',
-    description:
-      'Весёлая игра на реакцию и координацию. Задача участников — управлять движением мяча и набрать больше очков.',
-    image: elasticBall,
-    tag: 'Ловкость',
-    rental: 'от 15',
-    sale: '89€',
-    features: ['Деревянная конструкция', 'Эластичный мяч', 'Подходит для соревнований'],
-  },
-  {
-    name: 'Мемори Форт Боярд',
-    description:
-      'Большая версия игры на память в стиле знаменитого Форт Боярд. Участникам предстоит запоминать расположение элементов и находить нужные пары.',
-    image: memoryFortBoyard,
-    tag: 'Память',
-    rental: '15',
-    sale: '89€',
-    features: ['Игровое поле', 'Комплект элементов', 'Для детей и взрослых'],
-  },
-  {
-    name: 'Магниты',
-    description:
-      'Захватывающая настольная игра с магнитными элементами. Отличный вариант для проверки ловкости, точности и стратегического мышления.',
-    image: magnets,
-    tag: 'Стратегия',
-    rental: null,
-    sale: 'от 15€',
-    features: ['Деревянное поле', 'Магнитные элементы', 'Для компании'],
-  },
-  {
-    name: 'Кульбито',
-    description:
-      'Необычная деревянная игра, в которой участникам необходимо проявить ловкость и точность, чтобы выполнить игровую задачу.',
-    image: kulbito,
-    tag: 'Ловкость',
-    rental: ' 15',
-    sale: '119€',
-    features: ['Деревянная конструкция', 'Игровые элементы', 'Подходит для мероприятий'],
-  },
-  {
-    name: 'Плинко',
-    description:
-      'Большая версия популярной игры Плинко. Запускайте шарик сверху и наблюдайте за его движением через препятствия — результат зависит от удачи и точности.',
-    image: plynko,
-    tag: 'Веселье',
-    rental: '20',
-    sale: '119€',
-    features: ['Большое игровое поле', 'Шарики', 'Подходит для соревнований'],
-  },
-];
+  const gamesList = ws.games.map((g, idx) => {
+    const meta = WOOD_GAMES_METADATA[idx] || WOOD_GAMES_METADATA[0];
+    return {
+      id: meta.id,
+      name: g.name,
+      description: g.description,
+      tag: g.tag,
+      image: meta.image,
+      isMegaJenga: meta.isMegaJenga,
+      categories: meta.categories || ['wooden'],
+      rental: g.rental,
+      sale: g.sale,
+    };
+  });
+
+  const categories = [
+    { key: 'all', label: ws.categories?.all || 'Все' },
+    { key: 'puzzles', label: ws.categories?.puzzles || '🧩 Головоломки' },
+    { key: 'wooden', label: ws.categories?.wooden || '🪵 Деревянные игры' },
+    { key: 'exclusive', label: ws.categories?.exclusive || '✨ Эксклюзивные' },
+    { key: 'magnets', label: ws.categories?.magnets || '🧲 Магниты' },
+  ];
+
+  const filteredGames = gamesList.filter((game) => {
+    if (activeCategory === 'all') return true;
+    return game.categories?.includes(activeCategory);
+  });
 
   return (
-    <section
-      id="wood-pricing"
-      className="py-20 px-6 bg-zinc-950"
-    >
+    <section id="wood-pricing" className="py-20 px-4 sm:px-6 bg-zinc-950">
       <div className="max-w-6xl mx-auto">
-
         {/* Заголовок */}
-        <div className="text-center mb-14">
-          <span className="inline-block text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400 mb-3">
-            WoodIQ
+        <div className="text-center mb-10">
+          <span className="inline-block text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400 mb-3 bg-amber-400/10 px-3.5 py-1.5 rounded-full border border-amber-400/20">
+            {ws.badge}
           </span>
 
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
-            Аренда деревянных игр
+            {ws.title}
           </h2>
 
           <p className="max-w-2xl mx-auto text-zinc-400 text-sm leading-relaxed">
-            Большие деревянные игры для корпоративов, праздников,
-            свадеб, фестивалей и других мероприятий.
+            {ws.subtitle}
           </p>
         </div>
 
-        {/* Карточки */}
-    {/* Галерея */}
-<div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-  {rentals.map((game, index) => (
-    <button
-      key={index}
-      type="button"
-      onClick={() => setSelectedGame(game)}
-      className="group relative flex-none w-64 h-72 overflow-hidden rounded-2xl snap-start border border-zinc-800 hover:border-amber-400/60 transition-all duration-300"
-    >
-      <img
-        src={game.image}
-        alt={game.name}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-      />
+        {/* 4 Раздела / Категории */}
+        <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap mb-10">
+          {categories.map((cat) => (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => setActiveCategory(cat.key)}
+              className={`px-4 sm:px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                activeCategory === cat.key
+                  ? 'bg-amber-400 text-zinc-950 shadow-[0_0_20px_rgba(251,191,36,0.25)] scale-105'
+                  : 'bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
 
-      {/* Затемнение */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+        {/* Галерея игр */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredGames.map((game, index) => {
+            const inCart = isInCart(game.id || game.name);
 
-      {/* Категория */}
-      <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-zinc-950/80 border border-amber-400/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
-        {game.tag}
-      </span>
+            return (
+              <div
+                key={game.id || index}
+                className="group relative h-96 overflow-hidden rounded-3xl border border-zinc-800 hover:border-amber-400/60 transition-all duration-300 flex flex-col justify-end text-left shadow-lg bg-zinc-900"
+              >
+                <img
+                  src={game.image}
+                  alt={game.name}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
 
-      {/* Название */}
-      <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-        <h3 className="text-lg font-bold text-white">
-          {game.name}
-        </h3>
+                {/* Затемнение */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
 
-        <span className="inline-block mt-2 text-xs text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">
-          Нажмите для просмотра →
-        </span>
-      </div>
-    </button>
-  ))}
-</div>
+                {/* Категория */}
+                <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-zinc-950/80 border border-amber-400/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                  {game.tag}
+                </span>
+
+                {/* Кнопка Корзины */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCart(game);
+                  }}
+                  className={`absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 cursor-pointer shadow-md ${
+                    inCart
+                      ? 'bg-amber-400 text-zinc-950 scale-105 shadow-amber-400/30'
+                      : 'bg-black/65 text-zinc-300 hover:scale-110 hover:text-white'
+                  }`}
+                  title={inCart ? t.cart.removeBtn : t.cart.addToCart}
+                >
+                  <span className="text-base leading-none">
+                    🛒
+                  </span>
+                </button>
+
+                {/* Название и цены */}
+                <div className="relative p-6">
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {game.name}
+                  </h3>
+
+                  <p className="text-zinc-400 text-xs line-clamp-2 mb-3 leading-relaxed">
+                    {game.description}
+                  </p>
+
+                  <div className="flex items-center gap-2 text-xs text-zinc-300 mb-4">
+                    <span className="text-amber-400 font-semibold">{game.sale}</span>
+                    <span className="text-zinc-500">•</span>
+                    <span>{game.rental}</span>
+                    {game.isMegaJenga && (
+                      <span className="ml-auto text-[10px] font-black uppercase text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                        🧱 = 2 игры
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGame(game)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-white font-bold text-xs border border-zinc-700 transition cursor-pointer"
+                    >
+                      {ws.details}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!inCart) toggleCart(game);
+                        onOpenModal('rental', game.name);
+                      }}
+                      className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs transition cursor-pointer shadow"
+                    >
+                      {ws.rentGame}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
         {/* Дополнительная информация */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-            <div className="text-2xl mb-3">🚚</div>
-
-            <h4 className="text-white font-bold text-sm mb-1">
-              Доставка
-            </h4>
-
-            <p className="text-zinc-500 text-xs leading-relaxed">
-              Привезём игры непосредственно на ваше мероприятие.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-            <div className="text-2xl mb-3">📦</div>
-
-            <h4 className="text-white font-bold text-sm mb-1">
-              Всё необходимое
-            </h4>
-
-            <p className="text-zinc-500 text-xs leading-relaxed">
-              Все игровые элементы входят в комплект аренды.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-            <div className="text-2xl mb-3">🎉</div>
-
-            <h4 className="text-white font-bold text-sm mb-1">
-              Для мероприятий
-            </h4>
-
-            <p className="text-zinc-500 text-xs leading-relaxed">
-              Подойдут для корпоративов, свадеб, праздников и фестивалей.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-14">
+          {ws.infoCards.map((card, i) => (
+            <div key={i} className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+              <div className="text-2xl mb-3">{card.icon}</div>
+              <h4 className="text-white font-bold text-sm mb-1">{card.title}</h4>
+              <p className="text-zinc-500 text-xs leading-relaxed">{card.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Просмотр изображения */}
+      {/* Просмотр карточки игры */}
       {selectedGame && (
         <div
-          className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-center justify-center p-6"
+          className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
           onClick={() => setSelectedGame(null)}
         >
           <div
-            className="relative max-w-5xl w-full"
+            className="relative max-w-2xl w-full bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={selectedGame.image}
-              alt={selectedGame.name}
-              className="w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-zinc-700"
-            />
+            <div className="relative h-64 sm:h-80 w-full">
+              <img
+                src={selectedGame.image}
+                alt={selectedGame.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-black/40" />
 
-            <button
-              type="button"
-              onClick={() => setSelectedGame(null)}
-              className="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-zinc-900 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all text-xl"
-            >
-              ×
-            </button>
+              <button
+                type="button"
+                onClick={() => setSelectedGame(null)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-zinc-900/90 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all text-xl flex items-center justify-center cursor-pointer"
+              >
+                &times;
+              </button>
 
-            <div className="absolute bottom-4 left-4 px-4 py-2 rounded-xl bg-zinc-950/80 backdrop-blur-sm border border-zinc-700">
-              <p className="text-white font-bold text-sm">
-                {selectedGame.name}
+              <span className="absolute bottom-4 left-6 px-3 py-1 rounded-full bg-zinc-950/80 border border-amber-400/40 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                {selectedGame.tag}
+              </span>
+            </div>
+
+            <div className="p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <h3 className="text-2xl font-bold text-white">
+                  {selectedGame.name}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => toggleCart(selectedGame)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    isInCart(selectedGame.id || selectedGame.name)
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
+                      : 'bg-zinc-800 text-zinc-300 border border-zinc-700 hover:text-white'
+                  }`}
+                >
+                  <span>🛒</span>
+                  <span>{isInCart(selectedGame.id || selectedGame.name) ? t.cart.inCart : t.cart.addToCart}</span>
+                </button>
+              </div>
+
+              <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                {selectedGame.description}
               </p>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
+                  <span className="block text-[11px] text-zinc-500 uppercase tracking-wider">{ws.purchase}</span>
+                  <span className="text-amber-400 font-bold text-lg">{selectedGame.sale}</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
+                  <span className="block text-[11px] text-zinc-500 uppercase tracking-wider">{ws.rental}</span>
+                  <span className="text-white font-bold text-lg">{selectedGame.rental}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedGame(null);
+                    if (!isInCart(selectedGame.id || selectedGame.name)) {
+                      toggleCart(selectedGame);
+                    }
+                    onOpenModal('purchase', selectedGame.name);
+                  }}
+                  className="flex-1 py-3.5 rounded-xl bg-amber-400 text-zinc-950 font-bold text-sm hover:bg-amber-300 transition cursor-pointer"
+                >
+                  {ws.buyGame}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedGame(null);
+                    if (!isInCart(selectedGame.id || selectedGame.name)) {
+                      toggleCart(selectedGame);
+                    }
+                    onOpenModal('rental', selectedGame.name);
+                  }}
+                  className="flex-1 py-3.5 rounded-xl bg-zinc-800 text-white font-bold text-sm hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
+                >
+                  {ws.rentGame}
+                </button>
+              </div>
             </div>
           </div>
         </div>
