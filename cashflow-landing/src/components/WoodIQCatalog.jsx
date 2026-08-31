@@ -10,8 +10,8 @@ export function WoodIQCatalog({ onOpenModal }) {
   const ws = t.woodSelling;
   const { isInCart, toggleCart } = useCart();
 
-  // 3 выбранные популярные игры: Магніти, Еластик, IQ Puzzle
-  const popularIds = ['magnets', 'elasticBall', 'iqPuzzle'];
+  // 3 выбранные популярные игры: Велика Дженга, Хрестики-нулики, Чотири в ряд
+  const popularIds = ['django', 'tictactoe', 'fiveInARow'];
 
   const popularGames = popularIds.map((id) => {
     const metaIndex = WOOD_GAMES_METADATA.findIndex((m) => m.id === id);
