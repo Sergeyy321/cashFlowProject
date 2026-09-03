@@ -60,7 +60,7 @@ export function SchedulePricing({ eventDetails, customPrices, onOpenModal }) {
         </div>
 
         {/* Галерея тарифов (на мобильных — горизонтальный скролл) */}
-        <div className="flex md:grid md:grid-cols-2 gap-5 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-6 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide max-w-4xl mx-auto items-stretch">
+        <div className="flex md:grid md:grid-cols-2 gap-5 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pt-6 pb-6 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide max-w-4xl mx-auto items-stretch">
           {tiers.map((tier) => (
             <div 
               key={tier.id} 
@@ -71,7 +71,7 @@ export function SchedulePricing({ eventDetails, customPrices, onOpenModal }) {
               }`}
             >
               {tier.popular && (
-                <span className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-lime-400 text-zinc-950 font-black text-[10px] uppercase tracking-widest rounded-full shadow-md">
+                <span className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 px-4 py-1.5 bg-lime-400 text-zinc-950 font-black text-[10px] uppercase tracking-widest rounded-full shadow-lg z-20 whitespace-nowrap">
                   {s.popularBadge}
                 </span>
               )}

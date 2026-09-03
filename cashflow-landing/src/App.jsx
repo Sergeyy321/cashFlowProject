@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
+import { CashflowGallery } from './components/CashflowGallery';
 import { Benefits } from './components/Benefits';
 import { Quiz } from './components/Quiz';
 import { FAQ } from './components/FAQ';
@@ -196,6 +197,8 @@ export default function App() {
         {activePage === 'cashflow' && (
           <>
             <Hero onOpenModal={() => handleOpenModal('test')} />
+
+            <CashflowGallery />
 
             <SchedulePricing
               eventDetails={eventDetails}

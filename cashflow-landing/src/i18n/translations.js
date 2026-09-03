@@ -34,6 +34,29 @@ export const translations = {
       cta: 'Zapisz się na grę',
     },
 
+    // CASHFLOW GALLERY
+    cashflowGallery: {
+      badge: '📸 Atmosfera spotkań',
+      title: 'Tak wyglądają nasze gry',
+      subtitle: 'Prawdziwe emocje, networking i praktyka inwestycyjna przy stole gry Cashflow.',
+      swipeHint: 'Przesuń w prawo →',
+      viewPhoto: 'Powiększ',
+      items: [
+        {
+          title: 'Praktyka finansowa i analiza transakcji',
+          desc: 'Zawieranie realnych scenariuszy transakcji na papierze bez ryzyka utraty oszczędności',
+        },
+        {
+          title: 'Emocje, networking i wymiana doświadczeń',
+          desc: 'Poznaj przedsiębiorców i osoby z pasją do inwestowania',
+        },
+        {
+          title: 'Gra w gronie ambitnych ludzi',
+          desc: 'Wspólna analiza strategii biznesowych i wyjście z wyścigu szczurów',
+        },
+      ],
+    },
+
     // SCHEDULE CASHFLOW
     schedule: {
       badge: '⚡ Najbliższe spotkanie',
@@ -690,6 +713,29 @@ export const translations = {
       cta: 'Записатися на гру',
     },
 
+    // CASHFLOW GALLERY
+    cashflowGallery: {
+      badge: '📸 Атмосфера зустрічей',
+      title: 'Ось так проходять наші ігри',
+      subtitle: 'Справжні емоції, корисний нетворкінг та інвестиційна практика за столом Cashflow.',
+      swipeHint: 'Свайпніть вправо →',
+      viewPhoto: 'Збільшити',
+      items: [
+        {
+          title: 'Фінансова практика та аналіз угод',
+          desc: 'Укладання реальних сценаріїв угод на папері без ризику втрати заощаджень',
+        },
+        {
+          title: 'Емоції, нетворкінг та обмін досвідом',
+          desc: 'Знайомство з підприємцями та людьми, які прагнуть фінансової свободи',
+        },
+        {
+          title: 'Гра в колі амбітних людей',
+          desc: 'Спільний розбір бізнес-стратегій та вихід із «щурячих перегонів»',
+        },
+      ],
+    },
+
     // SCHEDULE CASHFLOW
     schedule: {
       badge: '⚡ Найближча зустріч',
@@ -1343,6 +1389,29 @@ export const translations = {
       title2: ' of gameplay',
       desc: 'Robert Kiyosaki’s legendary economic simulator. Build your investment mindset by executing high-stakes deals on paper guided by an experienced host, rather than risking real capital.',
       cta: 'Join the Game',
+    },
+
+    // CASHFLOW GALLERY
+    cashflowGallery: {
+      badge: '📸 Event Atmosphere',
+      title: 'This is how our games take place',
+      subtitle: 'Real emotions, valuable networking, and practical investing at the Cashflow game table.',
+      swipeHint: 'Swipe right →',
+      viewPhoto: 'Zoom',
+      items: [
+        {
+          title: 'Financial practice and deal evaluation',
+          desc: 'Executing real-world deal scenarios on paper without risking your savings',
+        },
+        {
+          title: 'Emotions, networking, and strategy exchange',
+          desc: 'Connect with entrepreneurs and people passionate about financial growth',
+        },
+        {
+          title: 'Playing alongside ambitious peers',
+          desc: 'Collaborative analysis of business strategies and breaking out of the rat race',
+        },
+      ],
     },
 
     // SCHEDULE CASHFLOW

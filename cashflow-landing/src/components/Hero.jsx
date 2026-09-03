@@ -1,5 +1,6 @@
 import React from 'react';
-import bgImage from '../img/photo_2026-01-16_14-33-51.jpg';
+import heroVideo from '../videos/a.MOV';
+import bgPoster from '../img/photo_2026-01-16_14-33-51.jpg';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export function Hero({ onOpenModal }) {
@@ -8,12 +9,19 @@ export function Hero({ onOpenModal }) {
 
   return (
     <section className="relative pt-16 pb-20 md:py-32 px-6 overflow-hidden">
-      <img
-        src={bgImage}
-        alt="Financial Game Cashflow"
-        className="absolute inset-0 w-full h-full object-cover scale-110 object-center"
-      />
-      <div className="absolute inset-0 bg-zinc-950/80" />
+      {/* Фоновое видео */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        poster={bgPoster}
+        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+      >
+        <source src={heroVideo} type="video/mp4" />
+        <source src={heroVideo} type="video/quicktime" />
+      </video>
+      <div className="absolute inset-0 bg-zinc-950/80 pointer-events-none" />
 
       {/* Мягкое неоновое свечение на фоне */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-lime-500/10 blur-[120px] pointer-events-none" />
