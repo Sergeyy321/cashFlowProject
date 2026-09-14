@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { WOOD_GAMES_METADATA } from '../data/woodGames';
+import { Cart, Search, Xmark, DeliveryTruck, Package, Spark } from 'iconoir-react';
 
 export function WoodIQSelling({ onOpenModal }) {
   const [selectedGame, setSelectedGame] = useState(null);
@@ -114,9 +115,7 @@ export function WoodIQSelling({ onOpenModal }) {
                     }`}
                     title={inCart ? t.cart.removeBtn : t.cart.addToCart}
                   >
-                    <span className="text-base leading-none">
-                      🛒
-                    </span>
+                    <Cart className="w-4 h-4" />
                   </button>
 
                   {/* Кнопка быстрого просмотра фото на карточке */}
@@ -129,7 +128,7 @@ export function WoodIQSelling({ onOpenModal }) {
                     className="absolute top-16 left-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/85 border border-white/10 text-white text-xs backdrop-blur-md hover:bg-zinc-900 hover:scale-105 transition-all cursor-pointer shadow-md"
                     title={t.cart.viewPhoto || 'Розгорнути фото'}
                   >
-                    <span>🔍</span>
+                    <Search className="w-3.5 h-3.5 text-zinc-300" />
                     <span className="text-[10px] font-semibold">{t.cart.viewPhoto || 'Розгорнути фото'}</span>
                   </button>
 
@@ -155,8 +154,12 @@ export function WoodIQSelling({ onOpenModal }) {
                     </div>
 
                     <div className="flex items-center gap-2 text-xs text-zinc-300 mb-4">
-                      <span className="text-amber-400 font-semibold">{game.sale}</span>
-                      <span className="text-zinc-500">•</span>
+                      {game.sale ? (
+                        <>
+                          <span className="text-amber-400 font-semibold">{game.sale}</span>
+                          <span className="text-zinc-500">•</span>
+                        </>
+                      ) : null}
                       <span>{game.rental}</span>
                       {game.isMegaJenga && (
                         <span className="ml-auto text-[10px] font-black uppercase text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
@@ -194,7 +197,15 @@ export function WoodIQSelling({ onOpenModal }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-14">
             {ws.infoCards.map((card, i) => (
               <div key={i} className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-                <div className="text-2xl mb-3">{card.icon}</div>
+                <div className="mb-3">
+                  {i === 0 ? (
+                    <DeliveryTruck className="w-7 h-7 text-amber-400" />
+                  ) : i === 1 ? (
+                    <Package className="w-7 h-7 text-amber-400" />
+                  ) : (
+                    <Spark className="w-7 h-7 text-amber-400" />
+                  )}
+                </div>
                 <h4 className="text-white font-bold text-sm mb-1">{card.title}</h4>
                 <p className="text-zinc-500 text-xs leading-relaxed">{card.desc}</p>
               </div>
@@ -227,7 +238,7 @@ export function WoodIQSelling({ onOpenModal }) {
 
                 {/* Подсказка увеличения фото */}
                 <div className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/80 border border-white/20 text-white text-xs backdrop-blur-md">
-                  <span>🔍</span>
+                  <Search className="w-3.5 h-3.5" />
                   <span className="text-[11px] font-semibold">{t.cart.viewPhoto || 'Powiększ zdjęcie'}</span>
                 </div>
 
@@ -237,9 +248,9 @@ export function WoodIQSelling({ onOpenModal }) {
                     e.stopPropagation();
                     setSelectedGame(null);
                   }}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-zinc-900/90 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all text-xl flex items-center justify-center cursor-pointer shadow-lg z-20"
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-zinc-900/90 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center cursor-pointer shadow-lg z-20"
                 >
-                  &times;
+                  <Xmark className="w-5 h-5" />
                 </button>
 
                 <span className="absolute bottom-4 left-6 px-3 py-1 rounded-full bg-zinc-950/80 border border-amber-400/40 text-amber-400 text-xs font-bold uppercase tracking-wider">
@@ -262,7 +273,7 @@ export function WoodIQSelling({ onOpenModal }) {
                         : 'bg-zinc-800 text-zinc-300 border border-zinc-700 hover:text-white'
                     }`}
                   >
-                    <span>🛒</span>
+                    <Cart className="w-4 h-4" />
                     <span>{isInCart(selectedGame.id || selectedGame.name) ? t.cart.inCart : t.cart.addToCart}</span>
                   </button>
                 </div>
@@ -277,11 +288,13 @@ export function WoodIQSelling({ onOpenModal }) {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
-                    <span className="block text-[11px] text-zinc-500 uppercase tracking-wider">{ws.purchase}</span>
-                    <span className="text-amber-400 font-bold text-base sm:text-lg">{selectedGame.sale}</span>
-                  </div>
+                <div className={`grid ${selectedGame.sale ? 'grid-cols-2' : 'grid-cols-1'} gap-4 mb-6`}>
+                  {selectedGame.sale && (
+                    <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
+                      <span className="block text-[11px] text-zinc-500 uppercase tracking-wider">{ws.purchase}</span>
+                      <span className="text-amber-400 font-bold text-base sm:text-lg">{selectedGame.sale}</span>
+                    </div>
+                  )}
                   <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
                     <span className="block text-[11px] text-zinc-500 uppercase tracking-wider">{ws.rental}</span>
                     <span className="text-white font-bold text-base sm:text-lg">{selectedGame.rental}</span>
@@ -289,19 +302,21 @@ export function WoodIQSelling({ onOpenModal }) {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedGame(null);
-                      if (!isInCart(selectedGame.id || selectedGame.name)) {
-                        toggleCart(selectedGame);
-                      }
-                      onOpenModal('purchase', selectedGame.name);
-                    }}
-                    className="flex-1 py-3.5 rounded-xl bg-amber-400 text-zinc-950 font-bold text-sm hover:bg-amber-300 transition cursor-pointer shadow-md"
-                  >
-                    {ws.buyGame}
-                  </button>
+                  {selectedGame.sale && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedGame(null);
+                        if (!isInCart(selectedGame.id || selectedGame.name)) {
+                          toggleCart(selectedGame);
+                        }
+                        onOpenModal('purchase', selectedGame.name);
+                      }}
+                      className="flex-1 py-3.5 rounded-xl bg-amber-400 text-zinc-950 font-bold text-sm hover:bg-amber-300 transition cursor-pointer shadow-md"
+                    >
+                      {ws.buyGame}
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -311,7 +326,11 @@ export function WoodIQSelling({ onOpenModal }) {
                       }
                       onOpenModal('rental', selectedGame.name);
                     }}
-                    className="flex-1 py-3.5 rounded-xl bg-zinc-800 text-white font-bold text-sm hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
+                    className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition cursor-pointer ${
+                      selectedGame.sale
+                        ? 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700'
+                        : 'bg-amber-400 text-zinc-950 hover:bg-amber-300 shadow-md'
+                    }`}
                   >
                     {ws.rentGame}
                   </button>
@@ -340,9 +359,9 @@ export function WoodIQSelling({ onOpenModal }) {
               <button
                 type="button"
                 onClick={() => setSelectedImage(null)}
-                className="absolute -top-3 -right-3 w-11 h-11 rounded-full bg-zinc-900 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all text-2xl flex items-center justify-center cursor-pointer shadow-2xl"
+                className="absolute -top-3 -right-3 w-11 h-11 rounded-full bg-zinc-900 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center cursor-pointer shadow-2xl"
               >
-                ✕
+                <Xmark className="w-6 h-6" />
               </button>
             </div>
           </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { WOOD_GAMES_METADATA } from '../data/woodGames';
+import { Cart, Search, Xmark } from 'iconoir-react';
 
 export function WoodIQCatalog({ onOpenModal }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -42,7 +43,7 @@ export function WoodIQCatalog({ onOpenModal }) {
               {wc.title}
             </h2>
             <p className="mt-3 text-zinc-400 text-sm max-w-xl mx-auto">
-              {wc.subtitle || 'Хиты деревянных игр для ваших мероприятий и праздников.'}
+              {wc.subtitle}
             </p>
           </div>
 
@@ -86,9 +87,7 @@ export function WoodIQCatalog({ onOpenModal }) {
                           }`}
                           title={inCart ? t.cart.removeBtn : t.cart.addToCart}
                         >
-                          <span className="text-base leading-none">
-                            🛒
-                          </span>
+                          <Cart className="w-4 h-4" />
                         </button>
 
                         {/* Кнопка просмотра фото */}
@@ -97,7 +96,7 @@ export function WoodIQCatalog({ onOpenModal }) {
                           onClick={() => setSelectedImage(g.image)}
                           className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-950/80 border border-white/10 text-white text-xs backdrop-blur hover:bg-zinc-900 transition cursor-pointer"
                         >
-                          <span>🔍</span>
+                          <Search className="w-3.5 h-3.5 text-zinc-300" />
                           <span className="text-[11px] font-medium">{t.cart.viewPhoto}</span>
                         </button>
 
@@ -140,7 +139,7 @@ export function WoodIQCatalog({ onOpenModal }) {
                             : 'bg-zinc-800/80 border border-zinc-700 hover:border-amber-400/50 text-zinc-200 hover:text-white'
                         }`}
                       >
-                        <span>🛒</span>
+                        <Cart className="w-4 h-4" />
                         <span>{inCart ? t.cart.inCart : t.cart.addToCart}</span>
                       </button>
 
@@ -182,9 +181,9 @@ export function WoodIQCatalog({ onOpenModal }) {
             <button
               type="button"
               onClick={() => setSelectedImage(null)}
-              className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-zinc-900 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all text-xl flex items-center justify-center cursor-pointer shadow-lg"
+              className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-zinc-900 text-white border border-zinc-700 hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center cursor-pointer shadow-lg"
             >
-              ✕
+              <Xmark className="w-5 h-5" />
             </button>
           </div>
         </div>

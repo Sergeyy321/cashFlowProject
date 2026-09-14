@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { Spark, Calendar, DeliveryTruck, Tools, Box, Phone, Clock } from 'iconoir-react';
 
 export function WoodIQRentals({ onOpenModal }) {
   const { t, lang } = useLanguage();
@@ -92,11 +93,11 @@ export function WoodIQRentals({ onOpenModal }) {
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#302b26]">
-            {calculatorMode === 'turnkey' ? (wr.turnkeyTitle || 'Комплексне обслуговування "Під ключ"') : (wr.subtitle || 'Оренда дерев’яних ігор')}
+            {wr.title || (lang === 'pl' ? 'Wynajem gier drewnianych' : lang === 'en' ? 'Wooden Game Rental' : 'Оренда дерев’яних ігор')}
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#71685d] sm:text-base">
-            {calculatorMode === 'turnkey' ? wr.turnkeySubtitle : wr.subtitle}
+            {wr.subtitle}
           </p>
         </div>
 
@@ -112,8 +113,8 @@ export function WoodIQRentals({ onOpenModal }) {
                   : 'text-[#766b5e] hover:text-[#3d362e]'
               }`}
             >
-              <span>🎩</span>
-              <span>{wr.modeTurnkey || 'Обслуговування "Під ключ"'}</span>
+              <Spark className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>{wr.modeTurnkey?.replace(/^[^\wа-яА-ЯіїєґІЇЄҐa-zA-Z"]+/, '') || 'Обслуговування "Під ключ"'}</span>
               <span className="hidden sm:inline-block bg-amber-400 text-zinc-950 text-[10px] px-2 py-0.5 rounded-full font-black uppercase">
                 Хіт
               </span>
@@ -128,8 +129,8 @@ export function WoodIQRentals({ onOpenModal }) {
                   : 'text-[#766b5e] hover:text-[#3d362e]'
               }`}
             >
-              <span>📅</span>
-              <span>{wr.modeDaily || 'Посуточна оренда'}</span>
+              <Calendar className="w-4 h-4 text-[#766b5e] shrink-0" />
+              <span>{wr.modeDaily?.replace(/^[^\wа-яА-ЯіїєґІЇЄҐa-zA-Z"]+/, '') || 'Подобова оренда'}</span>
             </button>
           </div>
         </div>
@@ -144,6 +145,11 @@ export function WoodIQRentals({ onOpenModal }) {
               {/* РЕЖИМ 1: ОБСЛУЖИВАНИЕ ПОД КЛЮЧ (Turnkey) */}
               {calculatorMode === 'turnkey' && (
                 <div className="space-y-6">
+                  {/* Опис формату "Під ключ" */}
+                  <div className="rounded-2xl bg-[#f4ebdc]/80 p-4 border border-[#decbb4] text-xs sm:text-sm text-[#675643] leading-relaxed">
+                    <p>{wr.turnkeySubtitle}</p>
+                  </div>
+
                   {/* Правила подсчета (Бейджи) */}
                   <div className="flex flex-wrap items-center justify-between gap-2 bg-[#f4ebdc] p-3.5 rounded-2xl border border-[#decbb4] text-xs font-semibold text-[#5a4835]">
                     <span className="font-bold text-[#3d362e]">{wr.turnkeyRules?.title || 'Правила розрахунку:'}</span>
@@ -235,16 +241,16 @@ export function WoodIQRentals({ onOpenModal }) {
 
                   {/* Что включено в обслуживание */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-[#6e5d4b]">
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
-                      <span>🚚</span>
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
+                      <DeliveryTruck className="w-4 h-4 text-[#8b6d47] shrink-0" />
                       <span>{wr.includedServices?.delivery || 'Доставка та монтаж зони'}</span>
                     </div>
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
-                      <span>👨‍🔧</span>
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
+                      <Tools className="w-4 h-4 text-[#8b6d47] shrink-0" />
                       <span>{wr.includedServices?.staff || 'Техніки та аніматори на місці'}</span>
                     </div>
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
-                      <span>🧹</span>
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
+                      <Box className="w-4 h-4 text-[#8b6d47] shrink-0" />
                       <span>{wr.includedServices?.cleanup || 'Демонтаж та вивезення'}</span>
                     </div>
                   </div>
@@ -266,7 +272,7 @@ export function WoodIQRentals({ onOpenModal }) {
 
                   {/* Примітка про зв'язок менеджера */}
                   <div className="flex items-center justify-center gap-2 pt-1 text-center text-xs font-medium text-[#7a6b5a]">
-                    <span>📞</span>
+                    <Phone className="w-3.5 h-3.5 text-[#8b6d47] shrink-0" />
                     <span>{wr.managerContactNote || "Для уточнення деталей та підтвердження замовлення менеджер з вами зв'яжеться"}</span>
                   </div>
                 </div>
@@ -419,9 +425,9 @@ export function WoodIQRentals({ onOpenModal }) {
 
                   {/* Информация */}
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-[#817669]">
-                    <span>🕐 {wr.infoHours}</span>
-                    <span>🎲 {wr.infoGames}</span>
-                    <span>🚚 {wr.infoDelivery}</span>
+                    <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#8b6d47]" /> {wr.infoHours}</span>
+                    <span className="inline-flex items-center gap-1.5"><Box className="w-3.5 h-3.5 text-[#8b6d47]" /> {wr.infoGames}</span>
+                    <span className="inline-flex items-center gap-1.5"><DeliveryTruck className="w-3.5 h-3.5 text-[#8b6d47]" /> {wr.infoDelivery}</span>
                   </div>
 
                   {/* Кнопка Забронировать посуточно */}
@@ -443,29 +449,6 @@ export function WoodIQRentals({ onOpenModal }) {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-
-
-        {/* Нижний блок для крупных мероприятий */}
-        <div className="mt-16 rounded-[28px] border border-[#d5c4aa] bg-[#e9dcc8]/70 p-8 text-center shadow-sm sm:p-12">
-          <div className="mx-auto max-w-2xl">
-            <h3 className="font-serif text-3xl font-bold text-[#302b26] sm:text-4xl">
-              {wr.bigEventTitle}
-            </h3>
-
-            <p className="mt-4 leading-7 text-[#706557]">
-              {wr.bigEventDesc}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => onOpenModal?.('turnkey', 'Велика подія (20+ ігор під ключ)')}
-              className="mt-7 rounded-xl bg-[#3d362e] px-7 py-3.5 font-bold text-[#f7f0e5] transition-all hover:-translate-y-0.5 hover:bg-[#51473c] hover:shadow-lg cursor-pointer"
-            >
-              {wr.getOfferBtn}
-            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import heroVideo from '../videos/video_2026-08-13_10-16-00.mp4';
 import { useLanguage } from '../i18n/LanguageContext';
+import { ChatBubble } from 'iconoir-react';
 
 export function HeroWoodIQ({ onOpenModal }) {
   const { t } = useLanguage();
@@ -44,14 +45,22 @@ export function HeroWoodIQ({ onOpenModal }) {
             {hw.desc}
           </p>
 
-          {/* Кнопка действия */}
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+          {/* Кнопки действия */}
+          <div className="flex flex-col justify-center gap-3 sm:gap-4 sm:flex-row">
             <button
               type="button"
               onClick={() => onOpenModal('rental')}
-              className="rounded-xl bg-amber-400 px-8 py-4 text-base font-bold text-zinc-950 shadow-[0_0_30px_rgba(251,191,36,0.3)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_40px_rgba(251,191,36,0.45)]"
+              className="rounded-xl bg-amber-400 px-8 py-4 text-base font-bold text-zinc-950 shadow-[0_0_30px_rgba(251,191,36,0.3)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_40px_rgba(251,191,36,0.45)] cursor-pointer"
             >
               {hw.cta}
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenModal('consultation')}
+              className="rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-amber-400/40 px-8 py-4 text-base font-bold text-white transition-all duration-300 hover:-translate-y-1 cursor-pointer backdrop-blur-md shadow-lg flex items-center justify-center gap-2"
+            >
+              <ChatBubble className="w-5 h-5 text-amber-400 shrink-0" />
+              <span>{t.woodModal?.consultationBannerTitle || 'Безкоштовна консультація'}</span>
             </button>
           </div>
 

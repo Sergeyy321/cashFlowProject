@@ -29,7 +29,7 @@ export function BookingModal({
   selectedTier = 'test',
   customPrices,
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const bm = t.bookingModal || {};
 
   const singlePrice = customPrices?.test || 120;
@@ -468,7 +468,9 @@ export function BookingModal({
                     <option value="Instagram">Instagram</option>
                     <option value="WhatsApp">WhatsApp</option>
                     <option value="Viber">Viber</option>
-                    <option value="Звонок">Звонок / Call</option>
+                    <option value={lang === 'pl' ? 'Telefon' : lang === 'en' ? 'Phone call' : 'Дзвінок'}>
+                      {lang === 'pl' ? 'Telefon (rozmowa)' : lang === 'en' ? 'Phone call' : 'Дзвінок'}
+                    </option>
                   </select>
 
                   <input
@@ -486,7 +488,9 @@ export function BookingModal({
                         ? '@instagram_nick'
                         : messengerPlatform === 'Telegram'
                         ? '@telegram_nick'
-                        : bm.messengerHandlePlaceholder || '@username або номер'
+                        : (messengerPlatform === 'Telefon' || messengerPlatform === 'Дзвінок' || messengerPlatform === 'Phone call' || messengerPlatform === 'Звонок')
+                        ? (lang === 'pl' ? 'Wygodna godzina na telefon' : lang === 'en' ? 'Preferred call time' : 'Зручний час дзвінка')
+                        : bm.messengerHandlePlaceholder || (lang === 'pl' ? '@nick lub numer' : '@username або номер')
                     }
                     className={`sm:col-span-3 rounded-xl bg-zinc-950 px-3.5 py-3 text-white outline-none text-sm transition-all ${
                       fieldErrors.messenger

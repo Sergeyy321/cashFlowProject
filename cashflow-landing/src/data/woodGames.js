@@ -183,7 +183,7 @@ export const WOOD_GAMES_METADATA = [
     image: django,
     isMegaJenga: true,
     categories: ['exclusive', 'wooden'],
-    purchasePriceEUR: 75,
+    purchasePriceEUR: null,
     rentalPricePLN: 100, // counts as 2 games
   },
   // 19. БАЛАНС ДИСК

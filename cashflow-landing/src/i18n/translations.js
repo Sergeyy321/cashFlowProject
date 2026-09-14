@@ -231,6 +231,7 @@ export const translations = {
     // WOODIQ CATALOG
     woodCatalog: {
       title: 'Popularne drewniane gry',
+      subtitle: 'Bestsellery gier drewnianych na Twoje imprezy, wesela i spotkania firmowe.',
       bookGame: 'Zarezerwuj grę',
       games: {
         fiveInARow: {
@@ -410,7 +411,7 @@ export const translations = {
           description: 'Gigantyczna wieża z klocków z litego drewna. Im wyższa wieża, tym większe emocje! Liczy się jak 2 gry w wynajmie.',
           tag: 'Łamigłówka & Balans',
           rental: '100 zł/dzień',
-          sale: '75 €',
+          sale: null,
         },
         {
           name: 'Dysk Równowagi',
@@ -446,23 +447,24 @@ export const translations = {
     // WOODIQ RENTAL
     woodRental: {
       badge: 'WOOD IQ',
+      title: 'Wynajem gier drewnianych',
       subtitle: 'Wybierz liczbę gier i czas wynajmu. Stwórz niezapomnianą atmosferę.',
       rentalPeriod: 'Okres wynajmu',
       selectDuration: 'Wybierz czas trwania',
       day1: '1 dzień',
       day2: '2 dni',
       gamesCount: 'Liczba gier',
-      profitable: 'Warto',
+      profitable: 'Najbardziej opłacalny',
       cost: 'Koszt',
       forPeriod: 'za',
-      hint: '✦ Optymalny wariant na większe wydarzenia',
+      hint: '✦ Optymalna opcja na imprezy firmowe i wesela',
       infoDelivery: 'Dostawa dostępna',
-      infoGames: 'Duże drewniane gry',
+      infoGames: 'Duże gry drewniane',
       infoHours: '8:00 — 20:00',
       bookBtn: 'Zarezerwuj',
-      megaJengaTitle: 'Wielka Jenga',
+      megaJengaTitle: 'Mega Jenga',
       megaJengaPrice: '100 zł / 150 zł',
-      megaJengaDesc: 'Gigantyczna wieża z litego drewna — w wynajmie liczy się jako 2 gry',
+      megaJengaDesc: 'Gigantyczna drewniana wieża — w wynajmie liczy się jako 2 gry',
       addOption: 'Wybierz →',
       chooseBtn: 'Wybierz',
       selectedBtn: '✓ Wybrano',
@@ -471,8 +473,8 @@ export const translations = {
       bigEventTitle: 'Potrzebujesz gier na duże wydarzenie?',
       bigEventDesc: 'Jeśli potrzebujesz 20 i więcej gier, transportu, montażu lub animatora — skontaktuj się z nami. Przygotujemy indywidualną ofertę.',
       getOfferBtn: 'Otrzymaj ofertę',
-      modeDaily: '📅 Wynajem dobowy',
-      modeTurnkey: '🎩 Obsługa "Pod klucz"',
+      modeDaily: 'Wynajem dobowy',
+      modeTurnkey: 'Obsługa "Pod klucz"',
       turnkeyBadge: 'Kompleksowa obsługa imprez',
       turnkeyTitle: 'Kompleksowa obsługa imprez (Wszystko w cenie)',
       turnkeySubtitle: 'Przyjeżdżamy na miejsce, przygotowujemy strefę do gry i rozkładamy gry. Mamy również techników i animatorów, którzy są obecni przez cały czas trwania wydarzenia, pomagają w grze, tłumaczą zasady i dbają o integralność gier. Po zakończeniu wydarzenia sami wszystko składamy i wywozimy, więc nie musisz nic robić — my zajmujemy się wszystkim. To najwygodniejsza opcja.',
@@ -640,6 +642,12 @@ export const translations = {
       rentalSub: 'Płatność za dni (PLN)',
       purchaseOption: 'Kupno gier',
       purchaseSub: 'Na stałe (EUR)',
+      consultationOption: 'Konsultacja',
+      consultationSub: 'Bezpłatnie',
+      consultationBannerTitle: 'Darmowa konsultacja',
+      consultationBannerDesc: 'Wypełnij swoje dane — menedżer wkrótce się z Tobą skontaktuje, doradzi w wyborze gier i odpowie na wszystkie pytania.',
+      consultationSuccessDesc: 'W najbliższym czasie menedżer skontaktuje się z Tobą.',
+      consultationSubmitBtn: 'Zamów bezpłatną konsultację',
       cityLabel: 'Miasto',
       gamesCountLabel: 'Liczba gier',
       durationLabel: 'Okres wynajmu (dni)',
@@ -910,6 +918,7 @@ export const translations = {
     // WOODIQ CATALOG
     woodCatalog: {
       title: 'Популярні дерев’яні ігри',
+      subtitle: 'Хіти дерев’яних ігор для ваших заходів, свят та корпоративів.',
       bookGame: 'Забронювати гру',
       games: {
         fiveInARow: {
@@ -1089,7 +1098,7 @@ export const translations = {
           description: 'Гігантська дерев’яна вежа для веселих змагань. Що вища вежа — то більше емоцій! Рахується як 2 гри в оренді.',
           tag: 'Головоломка & Баланс',
           rental: '100 zł/день',
-          sale: '75 €',
+          sale: null,
         },
         {
           name: 'Баланс Диск',
@@ -1125,6 +1134,7 @@ export const translations = {
     // WOODIQ RENTAL
     woodRental: {
       badge: 'WOOD IQ',
+      title: 'Оренда дерев’яних ігор',
       subtitle: 'Оберіть кількість ігор та тривалість оренди. Створіть незабутню атмосферу.',
       rentalPeriod: 'Період оренди',
       selectDuration: 'Оберіть тривалість',
@@ -1150,8 +1160,8 @@ export const translations = {
       bigEventTitle: 'Потрібні ігри для великої події?',
       bigEventDesc: 'Якщо вам потрібно 20 і більше ігор, доставка, монтаж або допомога аніматора — зв’яжіться з нами. Ми підготуємо пропозицію під вашу подію.',
       getOfferBtn: 'Отримати пропозицію',
-      modeDaily: '📅 Посуточна оренда',
-      modeTurnkey: '🎩 Обслуговування "Під ключ"',
+      modeDaily: 'Подобова оренда',
+      modeTurnkey: 'Обслуговування "Під ключ"',
       turnkeyBadge: 'Комплексне обслуговування заходів',
       turnkeyTitle: 'Комплексне обслуговування івентів (Все включено)',
       turnkeySubtitle: 'Приїжджаємо на місце, готуємо ігрову зону та розкладаємо ігри. Наші техніки та аніматори присутні протягом усього заходу, допомагають у грі, пояснюють правила та дбають про ігри та гостей. Після завершення свята ми самі все збираємо та вивозимо, тому вам не потрібно нічого робити — ми подбаємо про все. Це найзручніший варіант.',
@@ -1318,6 +1328,12 @@ export const translations = {
       rentalSub: 'Оплата за дні (PLN)',
       purchaseOption: 'Купівля ігор',
       purchaseSub: 'Назавжди (EUR)',
+      consultationOption: 'Консультація',
+      consultationSub: 'Безкоштовно',
+      consultationBannerTitle: 'Безкоштовна консультація',
+      consultationBannerDesc: "Заповніть ваші контакти — наш менеджер зв'яжеться з вами найближчим часом, проконсультує щодо вибору ігор та відповість на будь-які запитання.",
+      consultationSuccessDesc: "Найближчим часом менеджер зв'яжеться з вами.",
+      consultationSubmitBtn: 'Замовити безкоштовну консультацію',
       cityLabel: 'Місто',
       gamesCountLabel: 'Кількість ігор',
       durationLabel: 'Термін оренди (дні)',
@@ -1588,6 +1604,7 @@ export const translations = {
     // WOODIQ CATALOG
     woodCatalog: {
       title: 'Popular Wooden Games',
+      subtitle: 'Top hit wooden games for your events, parties, and celebrations.',
       bookGame: 'Book This Game',
       games: {
         fiveInARow: {
@@ -1767,7 +1784,7 @@ export const translations = {
           description: 'Huge solid-wood block tower for hilarious competition. The higher it gets, the greater the thrill! Counts as 2 games in rental.',
           tag: 'Puzzles & Balance',
           rental: '100 zł/day',
-          sale: '75 €',
+          sale: null,
         },
         {
           name: 'Balance Disk',
@@ -1803,6 +1820,7 @@ export const translations = {
     // WOODIQ RENTAL
     woodRental: {
       badge: 'WOOD IQ',
+      title: 'Wooden Game Rental',
       subtitle: 'Choose your desired number of games and rental duration. Create an unforgettable event atmosphere.',
       rentalPeriod: 'Rental Period',
       selectDuration: 'Select duration',
@@ -1828,8 +1846,8 @@ export const translations = {
       bigEventTitle: 'Need Games for a Large Event?',
       bigEventDesc: 'If you need 20+ games, transportation, setup, or professional host assistance — reach out to us for a custom quote.',
       getOfferBtn: 'Get a Quote',
-      modeDaily: '📅 Daily Rental',
-      modeTurnkey: '🎩 Turnkey Event Service',
+      modeDaily: 'Daily Rental',
+      modeTurnkey: 'Turnkey Event Service',
       turnkeyBadge: 'Turnkey Event Service',
       turnkeyTitle: 'All-Inclusive Event Service (Full Turnkey)',
       turnkeySubtitle: 'We arrive on site, prepare the play zone, and setup all games. Our technicians and animators stay present throughout the entire event, guide the gameplay, explain rules, and take care of the games and guests. Afterwards, we pack and tear down everything ourselves — you enjoy your event completely stress-free!',
@@ -1996,6 +2014,12 @@ export const translations = {
       rentalSub: 'Daily rate (PLN)',
       purchaseOption: 'Purchase Games',
       purchaseSub: 'Own forever (EUR)',
+      consultationOption: 'Consultation',
+      consultationSub: 'Free',
+      consultationBannerTitle: 'Free Consultation',
+      consultationBannerDesc: 'Leave your contact details — our manager will get in touch shortly to assist with game selection and answer any questions.',
+      consultationSuccessDesc: 'Our manager will contact you shortly.',
+      consultationSubmitBtn: 'Request Free Consultation',
       cityLabel: 'City',
       gamesCountLabel: 'Number of Games',
       durationLabel: 'Rental Duration (days)',
