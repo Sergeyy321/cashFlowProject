@@ -221,8 +221,8 @@ export const translations = {
 
     // HERO WOODIQ
     heroWoodIQ: {
-      badge: '🪵 Drewniane gry premium na wydarzenia',
-      title: 'Eko-gry i niezwykłe łamigłówki na Twoje wydarzenia',
+      badge: '✨ Prawdziwe emocje i integracja bez gadżetów',
+      title: 'Wielkie drewniane gry na wydarzenia',
       desc: 'Wynajem ręcznie wykonanych drewnianych gier na imprezy firmowe, wesela, festiwale i spotkania rodzinne.',
       cta: 'Zamów na wydarzenie',
       handmade: 'Ręcznie wykonane drewniane gry',
@@ -908,8 +908,8 @@ export const translations = {
 
     // HERO WOODIQ
     heroWoodIQ: {
-      badge: '🪵 Преміальні дерев’яні ігри на заходи',
-      title: 'Еко-ігри та незвичайні головоломки для ваших івентів',
+      badge: '✨ Живі емоції та азарт без гаджетів',
+      title: 'Великі дерев’яні ігри на заходи',
       desc: 'Оренда дерев’яних ігор ручної роботи для корпоративів, весіль, фестивалів та сімейних свят.',
       cta: 'Замовити на подію',
       handmade: 'Дерев’яні ігри ручної роботи',
@@ -1594,8 +1594,8 @@ export const translations = {
 
     // HERO WOODIQ
     heroWoodIQ: {
-      badge: '🪵 Premium Wooden Games for Events',
-      title: 'Eco-Games & Unique Puzzles for Your Events',
+      badge: '✨ Real Emotions & Live Fun Without Gadgets',
+      title: 'Giant Wooden Games for Events',
       desc: 'Handcrafted wooden game rentals for corporate retreats, weddings, festivals, and family celebrations.',
       cta: 'Book for an Event',
       handmade: 'Handcrafted wooden games',
