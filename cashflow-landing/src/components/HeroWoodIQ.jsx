@@ -1,4 +1,5 @@
 import React from 'react';
+import woodiqLogo from '../img/WOOD IQ-01.svg';
 import heroVideo from '../videos/video_2026-08-13_10-16-00.mp4';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ChatBubble } from 'iconoir-react';
@@ -28,20 +29,18 @@ export function HeroWoodIQ({ onOpenModal }) {
       {/* КОНТЕНТ */}
       <div className="relative z-20 flex min-h-[700px] items-center px-6 py-24">
         <div className="mx-auto w-full max-w-4xl text-center">
-          {/* Бейдж */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-black/40 px-4 py-2 text-xs font-bold text-amber-300 shadow-lg backdrop-blur-md">
-            {hw.badge}
+          {/* Логотип з назвою компанії */}
+          <div className="mb-3 inline-flex items-center gap-2.5">
+            <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-amber-400/20 p-1.5 border border-amber-400/40 shadow-[0_0_20px_rgba(251,191,36,0.25)] backdrop-blur-md">
+              <img src={woodiqLogo} alt="WOODIQ" className="h-full w-full object-contain" />
+            </span>
+            <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-wider text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+              WOOD<span className="text-amber-400">IQ</span>
+            </span>
           </div>
 
-          {/* Заголовок */}
-          <h1 className="mb-4 text-4xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:text-6xl lg:text-7xl">
-            <span className="text-amber-300">
-              {hw.title}
-            </span>
-          </h1>
-
-          {/* Соцмережі */}
-          <div className="mb-6 flex items-center justify-center gap-3">
+          {/* Соцмережі під назвою компанії */}
+          <div className="mb-6 sm:mb-8 flex items-center justify-center gap-3">
             <a
               href="https://t.me/CashFlow_Katowice"
               target="_blank"
@@ -71,7 +70,14 @@ export function HeroWoodIQ({ onOpenModal }) {
             </a>
           </div>
 
-          {/* Описание */}
+          {/* Заголовок (Жовтий текст) */}
+          <h1 className="mb-3 text-4xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:text-6xl lg:text-7xl">
+            <span className="text-amber-300">
+              {hw.title}
+            </span>
+          </h1>
+
+          {/* Опис (Білий текст) */}
           <p className="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.9)] md:text-xl">
             {hw.desc}
           </p>

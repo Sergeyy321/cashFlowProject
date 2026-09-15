@@ -101,7 +101,7 @@ export function WoodIQOrderModal({
   selectedTier,
   selectedGame,
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const wm = t.woodModal;
   const ws = t.woodSelling;
   const wr = t.woodRental;

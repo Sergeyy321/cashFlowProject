@@ -20,25 +20,6 @@ export function Footer({ activePage }) {
             <p className="text-xs text-zinc-600">
               {ft.cashflowRights}
             </p>
-
-            <div className="flex gap-4 text-xs font-semibold text-zinc-400">
-              <a
-                href="https://t.me/CashFlow_Katowice"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-lime-400 cursor-pointer transition-colors"
-              >
-                Telegram
-              </a>
-              <a
-                href="https://www.instagram.com/cashflowkatowice/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-lime-400 cursor-pointer transition-colors"
-              >
-                Instagram
-              </a>
-            </div>
           </>
         ) : (
           <>
@@ -49,17 +30,6 @@ export function Footer({ activePage }) {
             <p className="text-xs text-zinc-600">
               {ft.woodiqRights}
             </p>
-
-            <div className="flex gap-4 text-xs font-semibold text-zinc-400">
-              <a
-                href="https://www.instagram.com/woodiq.pl/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-amber-400 cursor-pointer transition-colors"
-              >
-                Instagram
-              </a>
-            </div>
           </>
         )}
       </div>
