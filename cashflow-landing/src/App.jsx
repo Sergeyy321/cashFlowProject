@@ -18,6 +18,7 @@ import { WoodIQSelling } from './components/WoodIQSelling';
 import { WoodIQOrderModal } from './components/WoodIQOrderModal';
 import { getSiteSettings } from './components/api/settings';
 import { ProductSwitcher } from './components/ProductSwitcher';
+import { PaymentStatusModal } from './components/PaymentStatusModal';
 import { useLanguage } from './i18n/LanguageContext';
 
 // ==========================================
@@ -40,6 +41,7 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState('');
   const [selectedTier, setSelectedTier] = useState('test');
+  const [modalOptions, setModalOptions] = useState({});
 
   // Определяем активный продукт из URL
   const [activePage, setActivePageState] = useState(getPageFromPath);
@@ -159,9 +161,10 @@ export default function App() {
   // ==========================================
   // OPEN / CLOSE MODAL
   // ==========================================
-  const handleOpenModal = (tier = 'general', game = '') => {
+  const handleOpenModal = (tier = 'general', game = '', options = {}) => {
     setSelectedTier(tier);
     setSelectedGame(game);
+    setModalOptions({ ...options, type: tier, game });
     setIsModalOpen(true);
   };
 
@@ -175,6 +178,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between">
       <Toaster position="top-right" />
+      <PaymentStatusModal />
 
       {/* HEADER */}
       <Header
@@ -260,6 +264,7 @@ export default function App() {
           onClose={handleCloseModal}
           selectedTier={selectedTier}
           selectedGame={selectedGame}
+          initialOrder={modalOptions}
         />
       )}
     </div>

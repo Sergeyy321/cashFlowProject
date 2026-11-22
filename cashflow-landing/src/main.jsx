@@ -4,15 +4,18 @@ import './index.css';
 import App from './App.jsx';
 import { LanguageProvider } from './i18n/LanguageContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
+import { CurrencyProvider } from './context/CurrencyContext.jsx';
 import { ErrorBoundary } from './components/ErrorBoundary.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
       <LanguageProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </CurrencyProvider>
       </LanguageProvider>
     </ErrorBoundary>
   </StrictMode>,

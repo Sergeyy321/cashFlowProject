@@ -15,34 +15,36 @@ export const Header = ({ activePage, setActivePage, onOpenModal, onOpenCart }) =
   const { cartCount } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900/80 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-2.5 sm:py-3.5 md:py-4 flex items-center justify-between gap-2 sm:gap-4 md:gap-6">
+    <header className="sticky top-0 z-40 bg-zinc-950/85 backdrop-blur-md border-b border-zinc-800/60 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 sm:gap-6">
         
-        {/* Brand Switcher Navigation */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0">
+        {/* Brand Segment Switcher */}
+        <div className="inline-flex items-center p-1 rounded-xl bg-zinc-900 border border-zinc-800/80 shrink-0">
           <button 
+            type="button"
             onClick={() => setActivePage('cashflow')}
-            className={`group flex items-center gap-2 px-2.5 sm:px-3.5 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-xl md:rounded-2xl transition-all duration-300 font-bold text-xs sm:text-sm md:text-base cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
               activePage === 'cashflow'
-                ? 'bg-gradient-to-r from-emerald-500/20 to-lime-500/20 border border-lime-400/50 text-white shadow-[0_0_20px_rgba(163,230,53,0.2)]'
-                : 'text-zinc-400 hover:text-white bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700'
+                ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/70'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <CashIcon />
             <span className="truncate">
-              Cashflow<span className="hidden xs:inline text-lime-400 font-black"> Club</span>
+              Cashflow<span className="hidden xs:inline text-lime-400 font-bold"> Club</span>
             </span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActivePage('woodiq')}
-            className={`group flex items-center gap-2 px-2.5 sm:px-3.5 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-xl md:rounded-2xl transition-all duration-300 font-bold text-xs sm:text-sm md:text-base cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
               activePage === 'woodiq'
-                ? 'bg-amber-500/20 border border-amber-400/50 text-white shadow-[0_0_20px_rgba(251,191,36,0.2)]'
-                : 'text-zinc-400 hover:text-white bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700'
+                ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/70'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0 transition-transform group-hover:scale-110">
+            <span className="flex items-center justify-center w-4 h-4 shrink-0">
               <img
                 src={woodiqLogo}
                 alt="WOODIQ"
@@ -50,76 +52,73 @@ export const Header = ({ activePage, setActivePage, onOpenModal, onOpenCart }) =
               />
             </span>
             <span className="truncate">
-              Wood<span className="text-amber-400 font-black">IQ</span>
+              Wood<span className="text-amber-400 font-bold">IQ</span>
             </span>
           </button>
         </div>
 
         {/* Desktop Section Anchors */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm md:text-[15px] font-semibold text-zinc-400">
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium text-zinc-400">
           {activePage === 'cashflow' ? (
             <>
-              <a href="#schedule" className="hover:text-lime-400 transition-colors py-1">{t.header.schedule}</a>
-              <a href="#about" className="hover:text-lime-400 transition-colors py-1">{t.header.about}</a>
-              <a href="#process" className="hover:text-lime-400 transition-colors py-1">{t.header.process}</a>
-              <a href="#quiz" className="hover:text-lime-400 transition-colors py-1">{t.header.quiz}</a>
+              <a href="#schedule" className="hover:text-white transition-colors">{t.header.schedule}</a>
+              <a href="#about" className="hover:text-white transition-colors">{t.header.about}</a>
+              <a href="#process" className="hover:text-white transition-colors">{t.header.process}</a>
+              <a href="#quiz" className="hover:text-white transition-colors">{t.header.quiz}</a>
             </>
           ) : (
             <>
-              <a href="#wood-catalog" className="hover:text-amber-400 transition-colors py-1">{t.header.woodCatalog}</a>
-              <a href="#wood-pricing" className="hover:text-amber-400 transition-colors py-1">{t.header.woodPricing}</a>
-              <a href="#wood-rental" className="hover:text-amber-400 transition-colors py-1">{t.header.woodRental}</a>
+              <a href="#wood-catalog" className="hover:text-white transition-colors">{t.header.woodCatalog}</a>
+              <a href="#wood-pricing" className="hover:text-white transition-colors">{t.header.woodPricing}</a>
+              <a href="#wood-rental" className="hover:text-white transition-colors">{t.header.woodRental}</a>
             </>
           )}
           <a
             href="#faq"
-            className={`${
-              activePage === 'woodiq' ? 'hover:text-amber-400' : 'hover:text-lime-400'
-            } transition-colors py-1`}
+            className="hover:text-white transition-colors"
           >
             {t.header.faq}
           </a>
         </nav>
 
         {/* Right actions: Cart + Language Switcher + CTA */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
 
           {/* Cart Button (for WoodIQ) */}
           {activePage === 'woodiq' && (
             <button
               type="button"
               onClick={() => onOpenCart ? onOpenCart() : onOpenModal('rental')}
-              className={`relative flex items-center gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl md:rounded-2xl border transition-all duration-300 shadow-inner group cursor-pointer ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
                 cartCount > 0
-                  ? 'bg-amber-400/20 border-amber-400/70 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.15)]'
-                  : 'bg-zinc-900/80 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                  ? 'bg-amber-400/10 border-amber-400/40 text-amber-300'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
               }`}
               title={t.cart.title}
             >
-              <Cart className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
-              <span className="hidden md:inline text-xs md:text-sm font-bold text-zinc-300 group-hover:text-amber-400 transition-colors">
+              <Cart className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="hidden md:inline text-xs font-semibold">
                 {t.cart.title}
               </span>
               {cartCount > 0 && (
-                <span className="flex items-center justify-center min-w-[18px] sm:min-w-[20px] h-4.5 sm:h-5 px-1 sm:px-1.5 rounded-full bg-amber-400 text-zinc-950 font-black text-[10px] sm:text-[11px] md:text-xs animate-pulse shadow-md">
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-zinc-950 font-bold text-[11px]">
                   {cartCount}
                 </span>
               )}
             </button>
           )}
 
-          {/* Compact Language Switcher */}
-          <div className="flex items-center rounded-xl md:rounded-2xl bg-zinc-900/90 border border-zinc-800/90 p-1 shadow-inner">
+          {/* Language Switcher */}
+          <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-zinc-800/80">
             {languages.map((l) => (
               <button
                 key={l.code}
+                type="button"
                 onClick={() => setLang(l.code)}
-                className={`px-2 sm:px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl text-[10px] sm:text-xs md:text-sm font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
+                className={`px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-semibold tracking-wider transition-colors cursor-pointer ${
                   lang === l.code
-                    ? activePage === 'woodiq'
-                      ? 'bg-amber-400 text-zinc-950 shadow-md scale-105'
-                      : 'bg-lime-400 text-zinc-950 shadow-md scale-105'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-zinc-800 text-white shadow-xs'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
                 title={l.name}
               >
@@ -130,11 +129,12 @@ export const Header = ({ activePage, setActivePage, onOpenModal, onOpenCart }) =
 
           {/* Action CTA Button on Desktop */}
           <button
+            type="button"
             onClick={onOpenModal}
-            className={`hidden md:block px-5 lg:px-6 py-2.5 lg:py-3 font-black rounded-xl md:rounded-2xl transition-all duration-300 text-sm md:text-[15px] cursor-pointer hover:scale-105 active:scale-95 shadow-md ${
+            className={`hidden md:inline-flex items-center justify-center px-4 sm:px-5 py-2 rounded-lg font-bold text-xs sm:text-sm tracking-tight text-zinc-950 transition-colors cursor-pointer shadow-sm ${
               activePage === 'cashflow'
-                ? 'bg-lime-400 text-zinc-950 hover:bg-lime-300 shadow-[0_0_25px_rgba(163,230,53,0.3)]'
-                : 'bg-amber-400 text-zinc-950 hover:bg-amber-300 shadow-[0_0_25px_rgba(251,191,36,0.3)]'
+                ? 'bg-lime-400 hover:bg-lime-300'
+                : 'bg-amber-400 hover:bg-amber-300'
             }`}
           >
             {activePage === 'cashflow' ? t.header.bookSpot : t.header.orderGames}

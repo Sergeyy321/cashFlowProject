@@ -1,5 +1,6 @@
 import React from "react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { Check, Calendar } from "iconoir-react";
 
 export function SchedulePricing({ eventDetails, customPrices, onOpenModal }) {
   const { t } = useLanguage();
@@ -14,7 +15,7 @@ export function SchedulePricing({ eventDetails, customPrices, onOpenModal }) {
       price: prices.test,
       features: s.tiers.test.features,
       cta: s.tiers.test.cta,
-      popular: true
+      popular: true,
     },
     {
       id: "combo",
@@ -23,84 +24,99 @@ export function SchedulePricing({ eventDetails, customPrices, onOpenModal }) {
       price: prices.combo,
       features: s.tiers.combo.features,
       cta: s.tiers.combo.cta,
-      popular: false
-    }
+      popular: false,
+    },
   ];
 
   return (
-    <section id="schedule" className="py-24 px-4 sm:px-6 bg-zinc-950 border-t border-zinc-900 overflow-hidden">
+    <section id="schedule" className="py-20 sm:py-24 px-4 sm:px-6 bg-zinc-950 border-b border-zinc-900">
       <div className="max-w-5xl mx-auto">
         
-        {/* Анонс ближайшей встречи */}
-        <div className="mb-16 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-lime-400/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="text-center max-w-2xl mx-auto relative z-10">
-            <span id="games" className="text-lime-400 text-xs font-bold uppercase tracking-widest bg-lime-400/10 px-3 py-1.5 rounded-full border border-lime-400/20 mb-2 inline-block">
-              {s.badge}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-4 mb-3">
-              {eventDetails.date || s.defaultDate}
-            </h2>
-            <p className="text-zinc-300 text-sm md:text-base font-medium mb-6">
-              📍 {eventDetails.place || s.defaultPlace}
-            </p>
-            
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-950/80 border border-zinc-800 rounded-xl text-xs font-semibold text-zinc-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              {s.spotsLeft} <span className="text-lime-400 font-bold text-sm">{eventDetails.spots}</span>
-            </div>
+        {/* Next Event Announcement */}
+        <div className="mb-14 p-6 sm:p-8 rounded-2xl bg-zinc-900 border border-zinc-800 text-center max-w-3xl mx-auto">
+          <span id="games" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime-400/10 border border-lime-400/20 text-lime-400 text-xs font-semibold uppercase tracking-wider mb-4">
+            <Calendar className="w-3.5 h-3.5 text-lime-400" />
+            <span>{s.badge?.replace(/^[^\wа-яА-ЯіїєґІЇЄҐa-zA-Z]+/, '') || 'Найближча гра'}</span>
+          </span>
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">
+            {eventDetails.date || s.defaultDate}
+          </h2>
+
+          <p className="text-zinc-400 text-sm sm:text-base font-medium mb-5">
+            {eventDetails.place || s.defaultPlace}
+          </p>
+
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-medium text-zinc-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>{s.spotsLeft}</span>
+            <span className="text-white font-bold">{eventDetails.spots}</span>
           </div>
         </div>
 
-        {/* Тарифы на участие */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-2">{s.sectionTitle}</h2>
-          <p className="text-zinc-400 text-sm">{s.sectionSubtitle}</p>
+        {/* Section Heading */}
+        <div className="text-center mb-10 max-w-xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">
+            {s.sectionTitle}
+          </h2>
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            {s.sectionSubtitle}
+          </p>
         </div>
 
-        {/* Галерея тарифов (на мобильных — горизонтальный скролл) */}
-        <div className="flex md:grid md:grid-cols-2 gap-5 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pt-6 pb-6 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide max-w-4xl mx-auto items-stretch">
+        {/* Pricing Cards */}
+        <div className="flex md:grid md:grid-cols-2 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide max-w-3xl mx-auto items-stretch">
           {tiers.map((tier) => (
             <div 
               key={tier.id} 
-              className={`relative min-w-[88%] sm:min-w-[70%] md:min-w-0 snap-center p-7 sm:p-8 rounded-3xl border transition-all duration-300 flex flex-col justify-between ${
+              className={`relative min-w-[88%] sm:min-w-[70%] md:min-w-0 snap-center p-6 sm:p-8 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${
                 tier.popular 
-                  ? 'bg-zinc-900/80 border-lime-400/60 shadow-[0_0_30px_rgba(163,230,53,0.1)]' 
-                  : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
+                  ? 'bg-zinc-900 border-lime-400/50 shadow-sm' 
+                  : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700'
               }`}
             >
               {tier.popular && (
-                <span className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 px-4 py-1.5 bg-lime-400 text-zinc-950 font-black text-[10px] uppercase tracking-widest rounded-full shadow-lg z-20 whitespace-nowrap">
+                <span className="absolute -top-3 left-6 px-3 py-1 bg-lime-400 text-zinc-950 font-bold text-[11px] uppercase tracking-wider rounded-full shadow-xs whitespace-nowrap">
                   {s.popularBadge}
                 </span>
               )}
 
               <div>
-                <h3 className="text-2xl font-bold text-white mb-1">{tier.title}</h3>
-                <p className="text-xs text-zinc-400 mb-6">{tier.subtitle}</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 tracking-tight">
+                  {tier.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-400 mb-6 leading-relaxed">
+                  {tier.subtitle}
+                </p>
                 
-                <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-4xl font-extrabold text-white">{tier.price}</span>
-                  <span className="text-sm font-semibold text-zinc-500">{s.currency}</span>
+                <div className="flex items-baseline gap-2 mb-6 pb-6 border-b border-zinc-800">
+                  <span className="text-4xl font-extrabold text-white tracking-tight">
+                    {tier.price}
+                  </span>
+                  <span className="text-sm font-semibold text-zinc-400">
+                    {s.currency}
+                  </span>
                 </div>
 
                 <ul className="space-y-3 mb-8">
                   {tier.features.map((feat, i) => (
-                    <li key={i} className="text-sm text-zinc-300 flex items-start gap-2.5">
-                      <span className="text-lime-400 font-bold mt-0.5">✓</span>
-                      <span>{feat}</span>
+                    <li key={i} className="text-xs sm:text-sm text-zinc-300 flex items-start gap-2.5">
+                      <span className="flex items-center justify-center w-4 h-4 rounded-full bg-lime-400/10 text-lime-400 mt-0.5 shrink-0">
+                        <Check className="w-3 h-3 text-lime-400" />
+                      </span>
+                      <span className="leading-snug">{feat}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               <button 
+                type="button"
                 onClick={() => onOpenModal(tier.id)}
-                className={`w-full py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-300 ${
+                className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer ${
                   tier.popular 
-                    ? 'bg-lime-400 text-zinc-950 hover:bg-lime-300 shadow-lg' 
-                    : 'bg-zinc-950 text-zinc-200 hover:bg-zinc-900 border border-zinc-800'
+                    ? 'bg-lime-400 text-zinc-950 hover:bg-lime-300 shadow-sm' 
+                    : 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700/80'
                 }`}
               >
                 {tier.cta}
@@ -109,14 +125,10 @@ export function SchedulePricing({ eventDetails, customPrices, onOpenModal }) {
           ))}
         </div>
 
-        {/* Подсказка свайпа для мобильных */}
-        <div className="flex md:hidden justify-center items-center gap-2 mt-4">
-          <span className="text-[11px] text-zinc-500 uppercase tracking-widest">
-            {s.swipeHint}
-          </span>
-          <span className="text-lime-400 text-sm">
-            →
-          </span>
+        {/* Mobile Swipe Hint */}
+        <div className="flex md:hidden justify-center items-center gap-1.5 mt-3 text-xs text-zinc-500 font-medium">
+          <span>{s.swipeHint}</span>
+          <span className="text-lime-400">→</span>
         </div>
 
       </div>

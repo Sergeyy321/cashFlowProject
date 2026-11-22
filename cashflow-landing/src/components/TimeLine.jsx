@@ -6,28 +6,43 @@ export function GameProcess() {
   const tm = t.timeline;
 
   return (
-    <section id="process" className="py-24 px-6 bg-zinc-950">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-extrabold text-white mb-4">{tm.title}</h2>
-          <p className="text-zinc-400 max-w-xl mx-auto">{tm.subtitle}</p>
+    <section id="process" className="py-20 sm:py-24 px-4 sm:px-6 bg-zinc-950 border-b border-zinc-900">
+      <div className="max-w-3xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-14 max-w-xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight">
+            {tm.title}
+          </h2>
+          <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
+            {tm.subtitle}
+          </p>
         </div>
 
-        <div className="relative border-l-2 border-emerald-500/20 ml-4 md:ml-32 space-y-12">
+        {/* Timeline List */}
+        <div className="relative border-l border-zinc-800 ml-4 sm:ml-28 space-y-10">
           {tm.steps.map((step, idx) => (
-            <div key={idx} className="relative pl-8 group">
-              <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-zinc-950 border-2 border-lime-400 group-hover:bg-lime-400 transition-colors duration-300" />
+            <div key={idx} className="relative pl-6 sm:pl-8 group">
+              {/* Dot */}
+              <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-lime-400 ring-4 ring-zinc-950" />
               
-              <div className="absolute -left-4 md:-left-32 top-0 hidden md:block w-24 text-right">
-                <span className="text-xs font-bold text-lime-400 uppercase tracking-wider">{step.time}</span>
-              </div>
-
-              <div className="p-6 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl group-hover:border-lime-500/20 transition-all duration-300">
-                <span className="text-xs font-bold text-lime-400 uppercase tracking-wider block md:hidden mb-2">
+              {/* Time Label on Desktop */}
+              <div className="absolute -left-28 top-0.5 hidden sm:block w-20 text-right">
+                <span className="text-xs font-bold text-lime-400 tracking-wider">
                   {step.time}
                 </span>
-                <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{step.desc}</p>
+              </div>
+
+              {/* Step Card */}
+              <div className="p-5 sm:p-6 rounded-xl bg-zinc-900/70 border border-zinc-800/80 transition-colors hover:border-zinc-700">
+                <span className="text-xs font-bold text-lime-400 tracking-wider block sm:hidden mb-1.5">
+                  {step.time}
+                </span>
+                <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+                  {step.desc}
+                </p>
               </div>
             </div>
           ))}

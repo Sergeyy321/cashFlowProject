@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { Spark, Calendar, DeliveryTruck, Tools, Box, Phone, Clock } from 'iconoir-react';
+import { Spark, Calendar, DeliveryTruck, Tools, Box, Phone, Clock, NavArrowDown } from 'iconoir-react';
 
 export function WoodIQRentals({ onOpenModal }) {
   const { t, lang } = useLanguage();
@@ -61,8 +61,7 @@ export function WoodIQRentals({ onOpenModal }) {
   const getLocalizedTierOption = (tier) => {
     const firstLabel = wr.firstHourShort || '1 год';
     const nextLabel = wr.nextHourShort || 'далі';
-    const perHour = wr.perHourShort || 'zł/год';
-    return `${tier.title} (${firstLabel}: ${tier.firstHour} zł | ${nextLabel}: +${tier.nextHour} ${perHour})`;
+    return `${tier.title} (${firstLabel}: ${tier.firstHour} zł (~${Math.round(tier.firstHour / 4.3)} €) | ${nextLabel}: +${tier.nextHour} zł (~${Math.round(tier.nextHour / 4.3)} €)/год)`;
   };
 
   return (
@@ -70,13 +69,13 @@ export function WoodIQRentals({ onOpenModal }) {
       id="wood-rental"
       className="relative overflow-hidden bg-[#f5efe4] py-20 text-[#2d2924] sm:py-28"
     >
-      {/* Декоративный фон */}
+      {/* Decorative ambient background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 top-20 h-[400px] w-[400px] rounded-full bg-[#d8c2a3]/20 blur-3xl" />
-        <div className="absolute -right-40 bottom-20 h-[500px] w-[500px] rounded-full bg-[#b99a70]/10 blur-3xl" />
+        <div className="absolute -left-40 top-20 h-[350px] w-[350px] rounded-full bg-[#d8c2a3]/15 blur-2xl" />
+        <div className="absolute -right-40 bottom-20 h-[400px] w-[400px] rounded-full bg-[#b99a70]/10 blur-2xl" />
 
         <div
-          className="absolute inset-0 opacity-[0.035]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
               'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 160 160\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'.4\'/%3E%3C/svg%3E")',
@@ -85,14 +84,14 @@ export function WoodIQRentals({ onOpenModal }) {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Заголовок */}
+        {/* Header */}
         <div className="mx-auto mb-10 max-w-3xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#b99a70]/30 bg-white/50 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#806747]">
-            <span className="h-2 w-2 rounded-full bg-[#a88961]" />
+          <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-[#b99a70]/30 bg-white/70 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#806747]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#a88961]" />
             {wr.badge}
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#302b26]">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#302b26] tracking-tight">
             {wr.title || (lang === 'pl' ? 'Wynajem gier drewnianych' : lang === 'en' ? 'Wooden Game Rental' : 'Оренда дерев’яних ігор')}
           </h2>
 
@@ -101,31 +100,31 @@ export function WoodIQRentals({ onOpenModal }) {
           </p>
         </div>
 
-        {/* ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА АРЕНДЫ */}
+        {/* Mode Switcher */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-2xl border border-[#d8c9b2] bg-white/70 p-1.5 shadow-sm backdrop-blur">
+          <div className="inline-flex rounded-xl border border-[#d8c9b2] bg-white/80 p-1 shadow-sm backdrop-blur">
             <button
               type="button"
               onClick={() => setCalculatorMode('turnkey')}
-              className={`rounded-xl px-5 py-3 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+              className={`rounded-lg px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
                 calculatorMode === 'turnkey'
-                  ? 'bg-[#3d362e] text-[#f7f0e5] shadow-md scale-[1.02]'
+                  ? 'bg-[#3d362e] text-[#f7f0e5] shadow-sm'
                   : 'text-[#766b5e] hover:text-[#3d362e]'
               }`}
             >
               <Spark className="w-4 h-4 text-amber-400 shrink-0" />
               <span>{wr.modeTurnkey?.replace(/^[^\wа-яА-ЯіїєґІЇЄҐa-zA-Z"]+/, '') || 'Обслуговування "Під ключ"'}</span>
               <span className="hidden sm:inline-block bg-amber-400 text-zinc-950 text-[10px] px-2 py-0.5 rounded-full font-black uppercase">
-                Хіт
+            Hit
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => setCalculatorMode('daily')}
-              className={`rounded-xl px-5 py-3 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+              className={`rounded-lg px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
                 calculatorMode === 'daily'
-                  ? 'bg-[#3d362e] text-[#f7f0e5] shadow-md scale-[1.02]'
+                  ? 'bg-[#3d362e] text-[#f7f0e5] shadow-sm'
                   : 'text-[#766b5e] hover:text-[#3d362e]'
               }`}
             >
@@ -135,9 +134,9 @@ export function WoodIQRentals({ onOpenModal }) {
           </div>
         </div>
 
-        {/* Компактный блок расчета */}
+        {/* Calculation Card */}
         <div className="mx-auto max-w-3xl">
-          <div className="relative overflow-hidden rounded-[30px] border border-[#d8c9b2] bg-[#fffdf9] shadow-[0_25px_70px_rgba(75,58,38,0.12)]">
+          <div className="relative overflow-hidden rounded-2xl border border-[#d8c9b2]/90 bg-[#fffdf9] shadow-lg">
             <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#d8c2a3]/20 blur-3xl pointer-events-none" />
 
             <div className="relative p-6 sm:p-8">
@@ -146,30 +145,30 @@ export function WoodIQRentals({ onOpenModal }) {
               {calculatorMode === 'turnkey' && (
                 <div className="space-y-6">
                   {/* Опис формату "Під ключ" */}
-                  <div className="rounded-2xl bg-[#f4ebdc]/80 p-4 border border-[#decbb4] text-xs sm:text-sm text-[#675643] leading-relaxed">
+                  <div className="rounded-xl bg-[#f4ebdc]/70 p-4 border border-[#decbb4]/80 text-xs sm:text-sm text-[#675643] leading-relaxed">
                     <p>{wr.turnkeySubtitle}</p>
                   </div>
 
                   {/* Правила подсчета (Бейджи) */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 bg-[#f4ebdc] p-3.5 rounded-2xl border border-[#decbb4] text-xs font-semibold text-[#5a4835]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-[#f4ebdc]/60 p-3.5 rounded-xl border border-[#decbb4]/80 text-xs font-semibold text-[#5a4835]">
                     <span className="font-bold text-[#3d362e]">{wr.turnkeyRules?.title || 'Правила розрахунку:'}</span>
-                    <span className="bg-white/80 px-2.5 py-1 rounded-lg border border-[#e2d5c3]">
+                    <span className="bg-white/90 px-2.5 py-1 rounded-lg border border-[#e2d5c3] shadow-xs">
                       {wr.turnkeyRules?.jenga || '🧱 Велика Дженга = 2 гри'}
                     </span>
-                    <span className="bg-white/80 px-2.5 py-1 rounded-lg border border-[#e2d5c3]">
+                    <span className="bg-white/90 px-2.5 py-1 rounded-lg border border-[#e2d5c3] shadow-xs">
                       {wr.turnkeyRules?.iqPuzzle || '🧩 IQ Puzzle (5 шт.) = 1 гра'}
                     </span>
                   </div>
 
                   {/* Блок селектов: Количество игр и Длительность в часах */}
-                  <div className="rounded-2xl border border-[#ded1bd] bg-[#f8f3eb] p-5 sm:p-6 space-y-5">
+                  <div className="rounded-xl border border-[#ded1bd] bg-[#f8f3eb] p-5 sm:p-6 space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                       
                       {/* 1. Селект количества игр (пакет) */}
                       <div>
                         <label
                           htmlFor="turnkey-games-select"
-                          className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653] block mb-2"
+                          className="text-[11px] font-bold uppercase tracking-wider text-[#756653] block mb-2"
                         >
                           {wr.gamesCount || 'Кількість ігор'}
                         </label>
@@ -179,7 +178,7 @@ export function WoodIQRentals({ onOpenModal }) {
                             id="turnkey-games-select"
                             value={selectedTurnkeyTier}
                             onChange={(e) => setSelectedTurnkeyTier(e.target.value)}
-                            className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3.5 pr-10 text-sm font-bold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-sm"
+                            className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3 pr-10 text-sm font-semibold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-xs"
                           >
                             {turnkeyPrices.map((tier) => (
                               <option key={tier.id} value={tier.id}>
@@ -187,9 +186,7 @@ export function WoodIQRentals({ onOpenModal }) {
                               </option>
                             ))}
                           </select>
-                          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] text-sm">
-                            ▾
-                          </span>
+                          <NavArrowDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] w-4 h-4" />
                         </div>
                       </div>
 
@@ -197,7 +194,7 @@ export function WoodIQRentals({ onOpenModal }) {
                       <div>
                         <label
                           htmlFor="turnkey-hours-select"
-                          className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653] block mb-2"
+                          className="text-[11px] font-bold uppercase tracking-wider text-[#756653] block mb-2"
                         >
                           {wr.hoursCount || 'Тривалість заходу'}
                         </label>
@@ -207,7 +204,7 @@ export function WoodIQRentals({ onOpenModal }) {
                             id="turnkey-hours-select"
                             value={turnkeyHours}
                             onChange={(e) => setTurnkeyHours(Number(e.target.value))}
-                            className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3.5 pr-10 text-sm font-bold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-sm"
+                            className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3 pr-10 text-sm font-semibold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-xs"
                           >
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
                               <option key={h} value={h}>
@@ -215,17 +212,15 @@ export function WoodIQRentals({ onOpenModal }) {
                               </option>
                             ))}
                           </select>
-                          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] text-sm">
-                            ▾
-                          </span>
+                          <NavArrowDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] w-4 h-4" />
                         </div>
                       </div>
                     </div>
 
                     {/* Итоговая плашка цены */}
-                    <div className="flex items-center justify-between rounded-xl bg-[#3d362e] px-5 py-4 text-[#f7f0e5] shadow-inner">
+                    <div className="flex items-center justify-between rounded-xl bg-[#3d362e] px-5 py-4 text-[#f7f0e5] shadow-xs">
                       <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[#cdbb9f] font-bold">
+                        <div className="text-[11px] uppercase tracking-wider text-[#cdbb9f] font-semibold">
                           {selectedTurnkey?.title} ({turnkeyHours} {wr.hourUnit || 'год.'})
                         </div>
                         <div className="text-xs text-[#b9aa96] mt-0.5">
@@ -234,24 +229,24 @@ export function WoodIQRentals({ onOpenModal }) {
                       </div>
 
                       <div className="text-2xl sm:text-3xl font-black text-amber-400">
-                        {turnkeyTotal} zł
+                        {turnkeyTotal} zł <span className="text-base sm:text-lg font-bold text-amber-400/80">(~{Math.round(turnkeyTotal / 4.3)} €)</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Что включено в обслуживание */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-[#6e5d4b]">
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
+                    <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#e2d5c3]/90 shadow-xs">
                       <DeliveryTruck className="w-4 h-4 text-[#8b6d47] shrink-0" />
-                      <span>{wr.includedServices?.delivery || 'Доставка та монтаж зони'}</span>
+                      <span className="font-medium">{wr.includedServices?.delivery || 'Доставка та монтаж зони'}</span>
                     </div>
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
+                    <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#e2d5c3]/90 shadow-xs">
                       <Tools className="w-4 h-4 text-[#8b6d47] shrink-0" />
-                      <span>{wr.includedServices?.staff || 'Техніки та аніматори на місці'}</span>
+                      <span className="font-medium">{wr.includedServices?.staff || 'Техніки та аніматори на місці'}</span>
                     </div>
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#e2d5c3]">
+                    <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#e2d5c3]/90 shadow-xs">
                       <Box className="w-4 h-4 text-[#8b6d47] shrink-0" />
-                      <span>{wr.includedServices?.cleanup || 'Демонтаж та вивезення'}</span>
+                      <span className="font-medium">{wr.includedServices?.cleanup || 'Демонтаж та вивезення'}</span>
                     </div>
                   </div>
 
@@ -264,10 +259,10 @@ export function WoodIQRentals({ onOpenModal }) {
                         `${selectedTurnkey?.title} (${turnkeyHours} год. під ключ)`
                       )
                     }
-                    className="flex w-full items-center justify-center gap-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 px-6 py-4 text-sm font-extrabold transition-all hover:-translate-y-0.5 hover:shadow-xl cursor-pointer shadow-md"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 px-6 py-3.5 text-sm font-bold transition-all cursor-pointer shadow-sm active:scale-[0.99]"
                   >
                     <span>{wr.turnkeyBookBtn || 'Замовити обслуговування під ключ'}</span>
-                    <span>→</span>
+                    <span>&rarr;</span>
                   </button>
 
                   {/* Примітка про зв'язок менеджера */}
@@ -280,14 +275,14 @@ export function WoodIQRentals({ onOpenModal }) {
 
               {/* РЕЖИМ 2: ПОСУТОЧНАЯ АРЕНДА (Daily) */}
               {calculatorMode === 'daily' && (
-                <div>
+                <div className="space-y-6">
                   {/* Период */}
-                  <div className="mb-7 flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-xs font-bold uppercase tracking-[0.15em] text-[#96764d]">
+                      <div className="text-xs font-bold uppercase tracking-wider text-[#96764d]">
                         {wr.rentalPeriod}
                       </div>
-                      <div className="mt-1 text-sm text-[#756b5e]">
+                      <div className="mt-0.5 text-xs sm:text-sm text-[#756b5e]">
                         {wr.selectDuration}
                       </div>
                     </div>
@@ -298,9 +293,9 @@ export function WoodIQRentals({ onOpenModal }) {
                           key={days}
                           type="button"
                           onClick={() => setPeriod(days)}
-                          className={`rounded-lg px-4 py-2 text-sm font-bold transition-all cursor-pointer ${
+                          className={`rounded-lg px-4 py-1.5 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                             period === days
-                              ? 'bg-[#3d362e] text-[#f7f0e5] shadow-sm'
+                              ? 'bg-[#3d362e] text-[#f7f0e5] shadow-xs'
                               : 'text-[#766b5e] hover:text-[#3d362e]'
                           }`}
                         >
@@ -311,17 +306,17 @@ export function WoodIQRentals({ onOpenModal }) {
                   </div>
 
                   {/* Количество игр */}
-                  <div className="rounded-2xl border border-[#ded1bd] bg-[#f8f3eb] p-4 sm:p-5">
+                  <div className="rounded-xl border border-[#ded1bd] bg-[#f8f3eb] p-4 sm:p-5">
                     <div className="mb-3 flex items-center justify-between">
                       <label
                         htmlFor="games-count"
-                        className="text-xs font-bold uppercase tracking-[0.15em] text-[#756653]"
+                        className="text-[11px] font-bold uppercase tracking-wider text-[#756653]"
                       >
                         {wr.gamesCount}
                       </label>
 
                       {selectedPrice?.popular && (
-                        <span className="rounded-full bg-[#e8dcc9] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#806747]">
+                        <span className="rounded-full bg-[#e8dcc9] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#806747]">
                           {wr.profitable}
                         </span>
                       )}
@@ -333,7 +328,7 @@ export function WoodIQRentals({ onOpenModal }) {
                           id="games-count"
                           value={selectedGames}
                           onChange={(e) => setSelectedGames(e.target.value)}
-                          className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-5 py-4 pr-12 text-base font-bold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer"
+                          className="w-full appearance-none rounded-xl border border-[#cdbb9f] bg-white px-4 py-3.5 pr-10 text-sm font-bold text-[#302b26] outline-none transition-all focus:border-[#8b6d47] focus:ring-2 focus:ring-[#c6ab84]/30 cursor-pointer shadow-xs"
                         >
                           {rentalPrices.map((item) => (
                             <option key={item.id} value={item.id}>
@@ -342,12 +337,10 @@ export function WoodIQRentals({ onOpenModal }) {
                           ))}
                         </select>
 
-                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#8b6d47]">
-                          ▾
-                        </span>
+                        <NavArrowDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8b6d47] w-4 h-4" />
                       </div>
 
-                      <div className="flex items-center justify-between rounded-xl bg-[#3d362e] px-5 py-3.5 text-[#f7f0e5] sm:min-w-[190px]">
+                      <div className="flex items-center justify-between rounded-xl bg-[#3d362e] px-5 py-3 text-[#f7f0e5] sm:min-w-[190px]">
                         <div>
                           <div className="text-[10px] uppercase tracking-wider text-[#cdbb9f]">
                             {wr.cost}
@@ -358,9 +351,16 @@ export function WoodIQRentals({ onOpenModal }) {
                         </div>
 
                         <div className="text-2xl font-black text-amber-400">
-                          {selectedPrice
-                            ? `${period === 1 ? selectedPrice.day1 : selectedPrice.day2} zł`
-                            : '—'}
+                          {selectedPrice ? (
+                            <>
+                              {period === 1 ? selectedPrice.day1 : selectedPrice.day2} zł{' '}
+                              <span className="text-sm sm:text-base font-bold text-amber-400/80">
+                                (~{Math.round((period === 1 ? selectedPrice.day1 : selectedPrice.day2) / 4.3)} €)
+                              </span>
+                            </>
+                          ) : (
+                            '—'
+                          )}
                         </div>
                       </div>
                     </div>
@@ -377,25 +377,25 @@ export function WoodIQRentals({ onOpenModal }) {
                     onClick={() => {
                       setSelectedGames(isMegaJengaSelected ? '3' : 'megajenga');
                     }}
-                    className={`mt-4 cursor-pointer rounded-2xl border p-4 transition-all duration-300 ${
+                    className={`cursor-pointer rounded-xl border p-4 transition-all duration-200 ${
                       isMegaJengaSelected
-                        ? 'border-[#8b6d47] bg-[#f0e3ce] shadow-md ring-2 ring-[#8b6d47]/30'
+                        ? 'border-[#8b6d47] bg-[#f0e3ce] shadow-xs ring-1 ring-[#8b6d47]/30'
                         : 'border-[#ded1bd] bg-[#fbf7f0] hover:border-[#b99a70] hover:bg-[#f5ebdb]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3.5">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#e3d1ba] text-2xl shadow-inner">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e3d1ba] text-xl">
                           🧱
                         </div>
 
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-[#302b26] text-base">
+                            <span className="font-bold text-[#302b26] text-sm sm:text-base">
                               {wr.megaJengaTitle || 'Mega Jenga'}
                             </span>
-                            <span className="rounded-full bg-[#3d362e] px-2.5 py-0.5 text-[11px] font-bold text-[#f7f0e5]">
-                              {period === 1 ? '100 zł' : '150 zł'}
+                            <span className="rounded-full bg-[#3d362e] px-2 py-0.5 text-[10px] font-bold text-[#f7f0e5]">
+                              {period === 1 ? '100 zł (~23 €)' : '150 zł (~35 €)'}
                             </span>
                           </div>
 
@@ -412,7 +412,7 @@ export function WoodIQRentals({ onOpenModal }) {
                           setSelectedGames('megajenga');
                           handleBooking('rental', 'Mega Jenga');
                         }}
-                        className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                        className={`shrink-0 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-xs cursor-pointer ${
                           isMegaJengaSelected
                             ? 'bg-[#3d362e] text-[#f7f0e5]'
                             : 'bg-[#8b6d47] text-white hover:bg-[#6e5434]'
@@ -424,7 +424,7 @@ export function WoodIQRentals({ onOpenModal }) {
                   </div>
 
                   {/* Информация */}
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-[#817669]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#817669]">
                     <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#8b6d47]" /> {wr.infoHours}</span>
                     <span className="inline-flex items-center gap-1.5"><Box className="w-3.5 h-3.5 text-[#8b6d47]" /> {wr.infoGames}</span>
                     <span className="inline-flex items-center gap-1.5"><DeliveryTruck className="w-3.5 h-3.5 text-[#8b6d47]" /> {wr.infoDelivery}</span>
@@ -441,10 +441,10 @@ export function WoodIQRentals({ onOpenModal }) {
                           : selectedPrice?.title || 'Оренда ігор'
                       )
                     }
-                    className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl bg-[#3d362e] px-6 py-4 text-sm font-bold text-[#f7f0e5] transition-all hover:-translate-y-0.5 hover:bg-[#51473c] hover:shadow-xl cursor-pointer"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#3d362e] px-6 py-3.5 text-sm font-bold text-[#f7f0e5] transition-all hover:bg-[#2c2721] cursor-pointer shadow-sm active:scale-[0.99]"
                   >
                     <span>{wr.bookBtn}</span>
-                    <span className="text-[#cdbb9f]">→</span>
+                    <span className="text-[#cdbb9f]">&rarr;</span>
                   </button>
                 </div>
               )}

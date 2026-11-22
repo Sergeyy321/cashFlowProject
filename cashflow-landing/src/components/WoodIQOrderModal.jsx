@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { WOOD_GAMES_METADATA } from '../data/woodGames';
 import { validateBotSafety, recordSuccessfulSubmission } from '../utils/antiBot';
+import { initiatePurchaseCheckout } from '../services/paymentService';
 import {
   Cart,
   Spark,
@@ -82,6 +84,14 @@ const UK_GAME_NAMES = {
   aeroHockey: "Аерохокей",
   elasticBall: "Еластик",
   kulbito: "Кульбіто",
+  puzzleMapUkraineA1: "Пазл «Вишивана карта України» (A1)",
+  puzzleKyivA3: "Пазл «Місто-герой Київ» (A3)",
+  puzzleKyivA4: "Пазл «Місто-герой Київ» (A4)",
+  puzzleKhersonA3: "Пазл «Місто-герой Херсон» (A3)",
+  puzzleKhersonA4: "Пазл «Місто-герой Херсон» (A4)",
+  puzzleSaloA4: "Пазл «Сало з часником» (A4)",
+  puzzleDerunyA4: "Пазл «Деруни зі сметаною» (A4)",
+  puzzleWolfA4: "Пазл «Етнічний Вовк» (A4)",
 };
 
 const UK_CITY_NAMES = {
@@ -102,6 +112,7 @@ export function WoodIQOrderModal({
   selectedGame,
 }) {
   const { t, lang } = useLanguage();
+  const { formatPrice, toEUR, rate } = useCurrency();
   const wm = t.woodModal;
   const ws = t.woodSelling;
   const wr = t.woodRental;
@@ -113,6 +124,9 @@ export function WoodIQOrderModal({
   const [days, setDays] = useState(1);
   const [hours, setHours] = useState(2);
   const [delivery, setDelivery] = useState(false);
+  const [chessSize, setChessSize] = useState('25x50'); // '25x50' | '30x60'
+  const [puzzleSize, setPuzzleSize] = useState('a4'); // 'a4' | 'a3' | 'a1'
+  const [puzzleImage, setPuzzleImage] = useState(null);
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+48 ');
@@ -159,6 +173,22 @@ export function WoodIQOrderModal({
     });
   }, [ws.games]);
 
+  // Проверяем, выбраны ли ТОЛЬКО пазлы (или модалка открыта конкретно для пазла)
+  const isPuzzleOnly = useMemo(() => {
+    const matched = allGames.find((g) => g.name === selectedGame || g.id === selectedGame);
+    const matchedMeta = matched ? WOOD_GAMES_METADATA.find(m => m.id === matched.id) : null;
+    const isSelectedPuzzle = matchedMeta?.categories?.includes('puzzles');
+
+    if (cart.length > 0) {
+      return cart.every((c) => {
+        const meta = WOOD_GAMES_METADATA.find((m) => m.id === c.id);
+        return meta?.categories?.includes('puzzles');
+      });
+    }
+
+    return Boolean(isSelectedPuzzle);
+  }, [allGames, selectedGame, cart]);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -169,6 +199,9 @@ export function WoodIQOrderModal({
     setPhone('+48 ');
     setMessengerPlatform('Telegram');
     setMessengerHandle('');
+    setChessSize(initialOrder?.chessSize || '25x50');
+    setPuzzleSize(initialOrder?.puzzleSize || 'a4');
+    setPuzzleImage(initialOrder?.puzzleImage || null);
     setFieldErrors({});
 
     setStatus({
@@ -178,7 +211,7 @@ export function WoodIQOrderModal({
 
     if (selectedTier === 'consultation' || initialOrder?.type === 'consultation') {
       setType('consultation');
-    } else if (selectedTier === 'purchase' || initialOrder?.type === 'purchase') {
+    } else if (isPuzzleOnly || selectedTier === 'purchase' || initialOrder?.type === 'purchase') {
       setType('purchase');
     } else if (selectedTier === 'turnkey' || initialOrder?.type === 'turnkey') {
       setType('turnkey');
@@ -196,7 +229,14 @@ export function WoodIQOrderModal({
         addToCart(matched);
       }
     }
-  }, [isOpen, initialOrder, selectedTier, selectedGame, allGames]);
+  }, [isOpen, initialOrder, selectedTier, selectedGame, allGames, isPuzzleOnly]);
+
+  // Если корзина стала содержать только пазлы, принудительно переключаем с аренды на покупку
+  useEffect(() => {
+    if (isPuzzleOnly && (type === 'rental' || type === 'turnkey')) {
+      setType('purchase');
+    }
+  }, [isPuzzleOnly, type]);
 
   // Эффективное количество игр
   const calculatedRentalCount = cart.length > 0 ? effectiveRentalGamesCount : Number(fallbackCount) || 1;
@@ -205,6 +245,29 @@ export function WoodIQOrderModal({
   // Расчет стоимости
   const price = useMemo(() => {
     if (type === 'purchase') {
+      // Если в корзине есть товары с фиксированной ценой (пазлы, шахматы с выбором размера):
+      if (cart.length > 0) {
+        let sum = 0;
+        let hasCustomPrice = false;
+        cart.forEach((c) => {
+          const meta = WOOD_GAMES_METADATA.find((m) => m.id === c.id);
+          if (c.id === 'chess') {
+            sum += chessSize === '30x60' ? 950 : 730;
+            hasCustomPrice = true;
+          } else if (c.id === 'woodPuzzle') {
+            sum += puzzleSize === 'a1' ? 200 : puzzleSize === 'a3' ? 100 : 80;
+            hasCustomPrice = true;
+          } else if (meta && meta.purchasePricePLN) {
+            sum += meta.purchasePricePLN;
+            hasCustomPrice = true;
+          } else if (meta && meta.purchasePriceEUR) {
+            sum += Math.round(meta.purchasePriceEUR * (rate || 4.4));
+            hasCustomPrice = true;
+          }
+        });
+        if (hasCustomPrice) return sum;
+      }
+
       const count = calculatedPurchaseCount;
       if (count <= 1) return purchaseTiersPricing[1];
       if (count <= 2) return purchaseTiersPricing[2];
@@ -239,9 +302,9 @@ export function WoodIQOrderModal({
     if (count <= 7) return rentalTiersPricing[7][dayKey];
     if (count <= 10) return rentalTiersPricing[10][dayKey];
     return rentalTiersPricing[20][dayKey];
-  }, [type, days, hours, calculatedRentalCount, calculatedPurchaseCount]);
+  }, [type, days, hours, calculatedRentalCount, calculatedPurchaseCount, cart, chessSize, puzzleSize]);
 
-  const currencySymbol = type === 'purchase' ? '€' : 'zł';
+  const currencySymbol = 'zł';
   const deliveryPrice = type === 'rental' && delivery ? 100 : 0;
   const total = price + deliveryPrice;
 
@@ -346,7 +409,16 @@ export function WoodIQOrderModal({
         ? 'Запит на безкоштовну консультацію'
         : cart.length > 0
         ? cart
-            .map((g) => `${UK_GAME_NAMES[g.id] || g.name}${g.isMegaJenga ? ' (Mega Jenga = 2 гри)' : ''}`)
+            .map((g) => {
+              if (g.id === 'chess') {
+                return `${UK_GAME_NAMES.chess || "Шахи та нарди 3 в 1"} (розмір: ${chessSize === '30x60' ? '30×60 см — 950 zł' : '25×50 см — 730 zł'})`;
+              }
+              if (g.id === 'woodPuzzle') {
+                const sizeLabel = puzzleSize === 'a1' ? 'A1 (60×84 см) — 200 zł' : puzzleSize === 'a3' ? 'A3 (30×42 см) — 100 zł' : 'A4 (21×30 см) — 80 zł';
+                return `${UK_GAME_NAMES.woodPuzzle || "Дерев'яні пазли"} (розмір: ${sizeLabel})`;
+              }
+              return `${UK_GAME_NAMES[g.id] || g.name}${g.isMegaJenga ? ' (Mega Jenga = 2 гри)' : ''}`;
+            })
             .join('; ')
         : `${calculatedRentalCount} ігор`;
 
@@ -407,7 +479,7 @@ export function WoodIQOrderModal({
       formData.append('format', ukFormat);
       formData.append('rentalType', ukFormat);
       formData.append('duration', ukDuration);
-      formData.append('currency', type === 'purchase' ? 'EUR' : 'PLN');
+      formData.append('currency', 'PLN');
       formData.append('games', gamesFormattedList);
       formData.append('days', numDays.toString()); // Строго ЧИСЛО (напр. 1, 2 или 0)
       formData.append('hours', numHours.toString()); // Строго ЧИСЛО (напр. 2, 3 или 0)
@@ -418,33 +490,178 @@ export function WoodIQOrderModal({
       formData.append('comment', fullComment);
 
       const url = import.meta.env.VITE_URL;
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-      });
 
-      if (!response.ok) {
-        throw new Error('Server error');
+      // ========================================================
+      // 1. ОНЛАЙН-ОПЛАТА STRIPE (ПОКУПКА, АРЕНДА, ОБСЛУЖИВАНИЕ ПОД КЛЮЧ)
+      // ========================================================
+      if (type !== 'consultation') {
+        let checkoutItems = [];
+        let orderTypeDesc = 'Замовлення WoodIQ';
+
+        if (type === 'purchase') {
+          orderTypeDesc = 'Купівля ігор WoodIQ';
+          checkoutItems = cart.length > 0
+            ? cart.map((item) => {
+                const meta = WOOD_GAMES_METADATA.find((m) => m.id === item.id);
+                let itemPrice = meta?.purchasePricePLN || (meta?.purchasePriceEUR ? Math.round(meta.purchasePriceEUR * (rate || 4.4)) : Math.round(price / (cart.length || 1)));
+                let itemName = item.title || item.name || 'Дерев’яна гра WoodIQ';
+                let itemImage = item.image || '';
+                let itemDescription = 'Габарити посилки: стандартні • Gabaryt B';
+                let itemGabaryt = 'Gabaryt B';
+
+                if (item.id === 'chess') {
+                  itemPrice = chessSize === '30x60' ? 950 : 730;
+                  const sizeName = chessSize === '30x60' ? '30×60 см' : '25×50 см';
+                  itemName = `Дерев'яні нарди та шахи 3 в 1 (${sizeName})`;
+                  itemDescription = chessSize === '30x60'
+                    ? 'Розміри: 30×60 см • Gabaryt C (InPost/Kurier) • Вага ~3.5 кг'
+                    : 'Розміри: 25×50 см • Gabaryt B (InPost/Kurier) • Вага ~2.8 кг';
+                  itemGabaryt = chessSize === '30x60' ? 'Gabaryt C' : 'Gabaryt B';
+                } else if (item.id === 'woodPuzzle') {
+                  itemPrice = puzzleSize === 'a1' ? 200 : puzzleSize === 'a3' ? 100 : 80;
+                  const pSizeLabel = puzzleSize === 'a1' ? 'A1 (60×84 см)' : puzzleSize === 'a3' ? 'A3 (30×42 см)' : 'A4 (21×30 см)';
+                  itemName = `Дерев'яні пазли (${pSizeLabel})`;
+                  itemDescription = puzzleSize === 'a1'
+                    ? 'Розміри: 60×84 см (A1) • Gabaryt B/C • Вага ~1.5 кг'
+                    : puzzleSize === 'a3'
+                    ? 'Розміри: 30×42 см (A3) • Gabaryt B • Вага ~0.8 кг'
+                    : 'Розміри: 21×30 см (A4) • Gabaryt A • Вага ~0.5 кг';
+                  itemGabaryt = puzzleSize === 'a1' ? 'Gabaryt C' : puzzleSize === 'a3' ? 'Gabaryt B' : 'Gabaryt A';
+                  const pMeta = WOOD_GAMES_METADATA.find((m) => m.id === 'woodPuzzle');
+                  const sObj = pMeta?.puzzleSizes?.find((s) => s.id === puzzleSize);
+                  if (puzzleImage || sObj?.image) {
+                    itemImage = puzzleImage || sObj.image;
+                  }
+                } else if (item.id === 'puzzleMapUkraineA1') {
+                  itemDescription = 'Розміри: 60×84 см (A1) • Gabaryt C • Вага ~1.5 кг';
+                  itemGabaryt = 'Gabaryt C';
+                } else if (item.id?.includes('A3')) {
+                  itemDescription = 'Формат A3 (30×42 см) • Gabaryt B • Вага ~0.8 кг';
+                  itemGabaryt = 'Gabaryt B';
+                } else if (item.id?.includes('A4')) {
+                  itemDescription = 'Формат A4 (21×30 см) • Gabaryt A • Вага ~0.5 кг';
+                  itemGabaryt = 'Gabaryt A';
+                }
+
+                return {
+                  name: itemName,
+                  quantity: 1,
+                  price: itemPrice,
+                  image: itemImage,
+                  description: itemDescription,
+                  dimensions: itemDescription,
+                  gabaryt: itemGabaryt,
+                };
+              })
+            : [{
+                name: `${calculatedPurchaseCount} дерев'яних ігор WoodIQ`,
+                quantity: 1,
+                price: price,
+                description: 'Габарити посилки стандартні',
+                gabaryt: 'Gabaryt B',
+              }];
+        } else if (type === 'rental') {
+          orderTypeDesc = `Оренда ігор (${days} дн.)`;
+          const gamesSummary = cart.length > 0
+            ? cart.map(g => UK_GAME_NAMES[g.id] || g.name).join(', ')
+            : `${calculatedRentalCount} ігор`;
+
+          checkoutItems = [
+            {
+              name: `Оренда дерев'яних ігор (${days === 1 ? wm.day1 : wm.day2})`,
+              description: `Ігри: ${gamesSummary}. Місто: ${city}`,
+              quantity: 1,
+              price: price,
+            },
+            ...(delivery ? [{
+              name: '🚚 Доставка та монтаж по місту',
+              description: `Доставка та монтаж ігрової зони (${city})`,
+              quantity: 1,
+              price: deliveryPrice,
+            }] : []),
+          ];
+        } else if (type === 'turnkey') {
+          orderTypeDesc = `Обслуговування "Під ключ" (${hours} год.)`;
+          const gamesSummary = cart.length > 0
+            ? cart.map(g => UK_GAME_NAMES[g.id] || g.name).join(', ')
+            : `${calculatedRentalCount} ігор`;
+
+          checkoutItems = [
+            {
+              name: `Комплексне обслуговування "Під ключ" (${hours} год.)`,
+              description: `Включено: аніматори, доставка, монтаж. Ігри: ${gamesSummary}. Місто: ${city}`,
+              quantity: 1,
+              price: total,
+            },
+          ];
+        }
+
+        const checkoutResult = await initiatePurchaseCheckout({
+          name: name.trim(),
+          phone: '+' + digits,
+          messenger: fullMessenger,
+          city: (UK_CITY_NAMES[city] || city) || 'Warszawa',
+          comment: `[${orderTypeDesc}] ${fullComment}`,
+          cartItems: checkoutItems,
+          total,
+          currency: currencySymbol,
+          orderType: type === 'purchase' ? 'woodiq_purchase' : (type === 'turnkey' ? 'woodiq_turnkey' : 'woodiq_rental'),
+        });
+
+        if (!checkoutResult || !checkoutResult.success) {
+          throw new Error(checkoutResult?.error || wm.errorGeneral || 'Не вдалося створити сесію оплати Stripe.');
+        }
+
+        // Резервне збереження в Google Таблицю
+        try {
+          formData.append('paymentStatus', checkoutResult.isMock ? '⏳ ОЧІКУЄ (MOCK STRIPE)' : '⏳ ОЧІКУЄ (STRIPE)');
+          formData.append('orderId', checkoutResult.orderId || '');
+          if (url) {
+            await fetch(url, { method: 'POST', body: formData });
+          }
+        } catch (sheetErr) {
+          console.warn('Backup save warning:', sheetErr);
+        }
+
+        recordSuccessfulSubmission();
+
+        if (checkoutResult.isMock) {
+          window.location.href = checkoutResult.mockCheckoutUrl;
+          return;
+        }
+
+        const targetUrl = checkoutResult.checkoutUrl || checkoutResult.url;
+        if (targetUrl) {
+          window.location.href = targetUrl;
+          return;
+        }
+
+        throw new Error('Платіжне посилання не отримано від Stripe.');
+      } else {
+        // Консультація — пряма відправка форми в Google Таблицю
+        if (url) {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            throw new Error('Server error');
+          }
+        }
+        recordSuccessfulSubmission();
+        setStatus({
+          type: 'success',
+          message: wm.consultationSuccessDesc || "Найближчим часом менеджер зв'яжеться з вами.",
+        });
+        setTimeout(() => {
+          handleCloseAndReset();
+        }, 3500);
       }
-
-      // Фиксируем успешную отправку для rate-limiter
-      recordSuccessfulSubmission();
-
-      setStatus({
-        type: 'success',
-        message: type === 'consultation'
-          ? (wm.consultationSuccessDesc || "Найближчим часом менеджер зв'яжеться з вами.")
-          : wm.successDesc,
-      });
-
-      setTimeout(() => {
-        handleCloseAndReset();
-      }, 3500);
     } catch (err) {
       console.error(err);
       setStatus({
         type: 'error',
-        message: wm.errorGeneral,
+        message: err.message || wm.errorGeneral,
       });
     } finally {
       setLoading(false);
@@ -558,48 +775,52 @@ export function WoodIQOrderModal({
                       {wm.formatLabel}
                     </label>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setType('turnkey');
-                          setDelivery(false);
-                        }}
-                        className={`rounded-2xl border p-3 sm:p-3.5 text-left transition cursor-pointer flex flex-col justify-between ${
-                          type === 'turnkey'
-                            ? 'border-[#3d362e] bg-[#3d362e] text-white shadow-md'
-                            : 'border-[#d5c4aa] bg-white hover:border-[#b99a70]'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm sm:text-base font-black">
-                            {wm.turnkeyOption || 'Під ключ'}
-                          </span>
-                          <span className="text-[10px] font-bold bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded">
-                            Хіт
-                          </span>
-                        </div>
-                        <div className="mt-1 text-[11px] opacity-80 leading-tight">
-                          {wm.turnkeySub || 'З аніматорами'}
-                        </div>
-                      </button>
+                    <div className={`grid ${isPuzzleOnly ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'} gap-2 sm:gap-2.5`}>
+                      {!isPuzzleOnly && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setType('turnkey');
+                              setDelivery(false);
+                            }}
+                            className={`rounded-2xl border p-3 sm:p-3.5 text-left transition cursor-pointer flex flex-col justify-between ${
+                              type === 'turnkey'
+                                ? 'border-[#3d362e] bg-[#3d362e] text-white shadow-md'
+                                : 'border-[#d5c4aa] bg-white hover:border-[#b99a70]'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm sm:text-base font-black">
+                                {wm.turnkeyOption || 'Під ключ'}
+                              </span>
+                              <span className="text-[10px] font-bold bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded">
+                                Хіт
+                              </span>
+                            </div>
+                            <div className="mt-1 text-[11px] opacity-80 leading-tight">
+                              {wm.turnkeySub || 'З аніматорами'}
+                            </div>
+                          </button>
 
-                      <button
-                        type="button"
-                        onClick={() => setType('rental')}
-                        className={`rounded-2xl border p-3 sm:p-3.5 text-left transition cursor-pointer flex flex-col justify-between ${
-                          type === 'rental'
-                            ? 'border-[#3d362e] bg-[#3d362e] text-white shadow-md'
-                            : 'border-[#d5c4aa] bg-white hover:border-[#b99a70]'
-                        }`}
-                      >
-                        <div className="text-sm sm:text-base font-black">
-                          {wm.rentalOption}
-                        </div>
-                        <div className="mt-1 text-[11px] opacity-80 leading-tight">
-                          {wm.rentalSub}
-                        </div>
-                      </button>
+                          <button
+                            type="button"
+                            onClick={() => setType('rental')}
+                            className={`rounded-2xl border p-3 sm:p-3.5 text-left transition cursor-pointer flex flex-col justify-between ${
+                              type === 'rental'
+                                ? 'border-[#3d362e] bg-[#3d362e] text-white shadow-md'
+                                : 'border-[#d5c4aa] bg-white hover:border-[#b99a70]'
+                            }`}
+                          >
+                            <div className="text-sm sm:text-base font-black">
+                              {wm.rentalOption}
+                            </div>
+                            <div className="mt-1 text-[11px] opacity-80 leading-tight">
+                              {wm.rentalSub}
+                            </div>
+                          </button>
+                        </>
+                      )}
 
                       <button
                         type="button"
@@ -638,7 +859,7 @@ export function WoodIQOrderModal({
                             {wm.consultationOption || 'Консультація'}
                           </span>
                           <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded">
-                            0 zł
+                            0 zł (0 €)
                           </span>
                         </div>
                         <div className="mt-1 text-[11px] opacity-80 leading-tight">
@@ -705,7 +926,20 @@ export function WoodIQOrderModal({
                       <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                         {cart.map((game) => {
                           const localized = allGames.find((ag) => ag.id === game.id);
-                          const displayName = localized ? localized.name : game.name;
+                          const isChess = game.id === 'chess';
+                          const isPuzzle = game.id === 'woodPuzzle';
+                          const pMeta = WOOD_GAMES_METADATA.find((m) => m.id === 'woodPuzzle');
+                          const sObj = pMeta?.puzzleSizes?.find((s) => s.id === puzzleSize);
+                          const gameImage = isPuzzle && (puzzleImage || sObj?.image)
+                            ? (puzzleImage || sObj.image)
+                            : game.image;
+
+                          const baseName = localized ? localized.name : game.name;
+                          const displayName = (type === 'purchase' && isChess)
+                            ? `${baseName} (${chessSize === '30x60' ? '30×60 см — 950 zł' : '25×50 см — 730 zł'})`
+                            : (type === 'purchase' && isPuzzle)
+                            ? `${baseName} (${puzzleSize.toUpperCase()} — ${puzzleSize === 'a1' ? '200 zł' : puzzleSize === 'a3' ? '100 zł' : '80 zł'})`
+                            : baseName;
                           const displayTag = localized ? localized.tag : game.tag;
 
                           return (
@@ -716,12 +950,12 @@ export function WoodIQOrderModal({
                               <div className="flex items-center gap-3 min-w-0">
                                 <button
                                   type="button"
-                                  onClick={() => setPreviewImage(game.image)}
+                                  onClick={() => setPreviewImage(gameImage)}
                                   className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-[#d8c9b2] group cursor-pointer"
                                   title={t.cart.viewPhoto}
                                 >
                                   <img
-                                    src={game.image}
+                                    src={gameImage}
                                     alt={displayName}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                                   />
@@ -791,6 +1025,162 @@ export function WoodIQOrderModal({
                       </div>
                     </div>
                   </div>
+
+                  {/* ВЫБОР РАЗМЕРА ШАХМАТ ПРИ ПОКУПКЕ */}
+                  {type === 'purchase' && (cart.some(c => c.id === 'chess') || selectedGame === 'chess' || allGames.find(g => g.name === selectedGame)?.id === 'chess') && (
+                    <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 sm:p-5">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-xs font-bold text-[#302b26] uppercase tracking-wide">
+                          {lang === 'pl' ? 'Wybierz rozmiar szachów:' : lang === 'en' ? 'Select chess size:' : 'Оберіть розмір шахів:'}
+                        </span>
+                        <span className="text-[11px] font-semibold text-amber-900 bg-amber-400/30 px-2.5 py-0.5 rounded-full">
+                          {chessSize === '30x60' ? '30×60 см — 950 zł' : '25×50 см — 730 zł'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setChessSize('25x50')}
+                          className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            chessSize === '25x50'
+                              ? 'bg-[#3d362e] text-white border-[#3d362e] shadow-md ring-2 ring-amber-400/50'
+                              : 'bg-white text-[#3d362e] border-[#ded1bd] hover:border-[#b99a70]'
+                          }`}
+                        >
+                          <div className="text-sm font-bold">25×50 см</div>
+                          <div className="mt-1 text-xs opacity-90 font-medium">{formatPrice(730)}</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setChessSize('30x60')}
+                          className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            chessSize === '30x60'
+                              ? 'bg-[#3d362e] text-white border-[#3d362e] shadow-md ring-2 ring-amber-400/50'
+                              : 'bg-white text-[#3d362e] border-[#ded1bd] hover:border-[#b99a70]'
+                          }`}
+                        >
+                          <div className="text-sm font-bold">30×60 см</div>
+                          <div className="mt-1 text-xs opacity-90 font-medium">{formatPrice(950)}</div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ВЫБОР РАЗМЕРА И КАРТИНКИ ПАЗЛОВ ПРИ ПОКУПКЕ */}
+                  {type === 'purchase' && (cart.some(c => c.id === 'woodPuzzle') || selectedGame === 'woodPuzzle' || allGames.find(g => g.name === selectedGame)?.id === 'woodPuzzle') && (() => {
+                    const pMeta = WOOD_GAMES_METADATA.find(m => m.id === 'woodPuzzle');
+                    const sObj = pMeta?.puzzleSizes?.find(s => s.id === puzzleSize);
+                    const currentImg = puzzleImage || sObj?.image;
+
+                    return (
+                      <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 sm:p-5">
+                        <div className="flex items-center justify-between mb-2.5">
+                          <span className="text-xs font-bold text-[#302b26] uppercase tracking-wide">
+                            {lang === 'pl' ? 'Wybierz rozmiar drewnianych puzzli:' : lang === 'en' ? 'Select puzzle size:' : "Оберіть розмір дерев'яних пазлів:"}
+                          </span>
+                          <span className="text-[11px] font-semibold text-amber-900 bg-amber-400/30 px-2.5 py-0.5 rounded-full">
+                            {puzzleSize.toUpperCase()} — {formatPrice(puzzleSize === 'a1' ? 200 : puzzleSize === 'a3' ? 100 : 80)}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 sm:gap-2.5 mb-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPuzzleSize('a4');
+                              const s = pMeta?.puzzleSizes?.find(x => x.id === 'a4');
+                              if (s?.image) setPuzzleImage(s.image);
+                            }}
+                            className={`p-2.5 sm:p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                              puzzleSize === 'a4'
+                                ? 'bg-[#3d362e] text-white border-[#3d362e] shadow-md ring-2 ring-amber-400/50'
+                                : 'bg-white text-[#3d362e] border-[#ded1bd] hover:border-[#b99a70]'
+                            }`}
+                          >
+                            <div className="text-xs sm:text-sm font-bold">A4</div>
+                            <div className="text-[10px] opacity-75">21×30 см</div>
+                            <div className="mt-1 text-xs opacity-90 font-medium">{formatPrice(80)}</div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPuzzleSize('a3');
+                              const s = pMeta?.puzzleSizes?.find(x => x.id === 'a3');
+                              if (s?.image) setPuzzleImage(s.image);
+                            }}
+                            className={`p-2.5 sm:p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                              puzzleSize === 'a3'
+                                ? 'bg-[#3d362e] text-white border-[#3d362e] shadow-md ring-2 ring-amber-400/50'
+                                : 'bg-white text-[#3d362e] border-[#ded1bd] hover:border-[#b99a70]'
+                            }`}
+                          >
+                            <div className="text-xs sm:text-sm font-bold">A3</div>
+                            <div className="text-[10px] opacity-75">30×42 см</div>
+                            <div className="mt-1 text-xs opacity-90 font-medium">{formatPrice(100)}</div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPuzzleSize('a1');
+                              const s = pMeta?.puzzleSizes?.find(x => x.id === 'a1');
+                              if (s?.image) setPuzzleImage(s.image);
+                            }}
+                            className={`p-2.5 sm:p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                              puzzleSize === 'a1'
+                                ? 'bg-[#3d362e] text-white border-[#3d362e] shadow-md ring-2 ring-amber-400/50'
+                                : 'bg-white text-[#3d362e] border-[#ded1bd] hover:border-[#b99a70]'
+                            }`}
+                          >
+                            <div className="text-xs sm:text-sm font-bold">A1</div>
+                            <div className="text-[10px] opacity-75">60×84 см</div>
+                            <div className="mt-1 text-xs opacity-90 font-medium">{formatPrice(200)}</div>
+                          </button>
+                        </div>
+
+                        {/* Preview and pattern gallery */}
+                        <div className="flex items-center gap-3 pt-2.5 border-t border-amber-400/20">
+                          {currentImg && (
+                            <img
+                              src={currentImg}
+                              alt="Puzzle Preview"
+                              onClick={() => setPreviewImage(currentImg)}
+                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-lg border border-amber-400/40 cursor-pointer shadow-sm hover:scale-105 transition-transform"
+                              title={t.cart?.viewPhoto || 'Збільшити фото'}
+                            />
+                          )}
+                          <div className="text-xs text-[#302b26] min-w-0 flex-1">
+                            <span className="font-bold block truncate">
+                              {puzzleSize === 'a1'
+                                ? '«Вишивана карта України» (A1)'
+                                : puzzleSize === 'a3'
+                                ? '«Місто-герой Київ / Херсон» (A3)'
+                                : '«Етнічний Вовк / Київ / Херсон» (A4)'}
+                            </span>
+                            <span className="text-[11px] opacity-80 block">
+                              {formatPrice(puzzleSize === 'a1' ? 200 : puzzleSize === 'a3' ? 100 : 80)}
+                            </span>
+                            {sObj?.gallery && sObj.gallery.length > 1 && (
+                              <div className="flex gap-1.5 mt-1.5 overflow-x-auto pb-0.5">
+                                {sObj.gallery.map((gImg, gIdx) => (
+                                  <button
+                                    key={gIdx}
+                                    type="button"
+                                    onClick={() => setPuzzleImage(gImg)}
+                                    className={`w-7 h-7 rounded border overflow-hidden cursor-pointer transition shrink-0 ${
+                                      (puzzleImage || sObj.image) === gImg
+                                        ? 'border-amber-600 ring-2 ring-amber-500/50'
+                                        : 'border-zinc-300 opacity-60 hover:opacity-100'
+                                    }`}
+                                  >
+                                    <img src={gImg} alt="" className="w-full h-full object-cover" />
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* ВЫБОР ДЛИТЕЛЬНОСТИ: ЧАСЫ (ДЛЯ ПОД КЛЮЧ) ИЛИ ДНИ (ДЛЯ АРЕНДЫ) */}
                   {type === 'turnkey' && (
@@ -866,7 +1256,7 @@ export function WoodIQOrderModal({
                           {wm.deliverySub}
                         </div>
                         <div className="mt-1 font-bold text-[#8b6d47]">
-                          +100 zł
+                          +{formatPrice(100)}
                         </div>
                       </div>
                     </label>
@@ -1072,13 +1462,13 @@ export function WoodIQOrderModal({
 
                       <div className="mt-2 flex justify-between text-sm text-[#d7cabb]">
                         <span>{wm.summaryPrice}</span>
-                        <span>{price} {currencySymbol}</span>
+                        <span>{price} {currencySymbol} <span className="opacity-80 text-xs font-normal">(~{toEUR(price)} €)</span></span>
                       </div>
 
                       {type === 'rental' && delivery && (
                         <div className="mt-2 flex justify-between text-sm text-[#d7cabb]">
                           <span>{wm.summaryDelivery}</span>
-                          <span>{deliveryPrice} zł</span>
+                          <span>{deliveryPrice} zł <span className="opacity-80 text-xs font-normal">(~{toEUR(deliveryPrice)} €)</span></span>
                         </div>
                       )}
 
@@ -1088,10 +1478,50 @@ export function WoodIQOrderModal({
                         <span className="text-lg font-bold">
                           {wm.summaryTotal}
                         </span>
-                        <span className="text-3xl font-black text-amber-400">
-                          {total} {currencySymbol}
-                        </span>
+                        <div className="text-right">
+                          <span className="text-3xl font-black text-amber-400">
+                            {total} {currencySymbol}
+                          </span>
+                          <span className="block text-xs font-bold text-amber-400/80">
+                            (~{toEUR(total)} €)
+                          </span>
+                        </div>
                       </div>
+
+                      {/* Уведомление о выборе доставки при покупке */}
+                      {type === 'purchase' && (
+                        <div className="mt-3.5 p-3 rounded-xl bg-amber-400/15 border border-amber-400/30 text-xs text-amber-200/95 flex items-start gap-2.5">
+                          <span className="text-lg leading-none shrink-0">📦</span>
+                          <div className="leading-relaxed">
+                            <span className="font-bold block text-white mb-0.5">
+                              {lang === 'pl' ? 'Wysyłka pocztowa (InPost / Kurier):' : lang === 'en' ? 'Postal Shipping (InPost / Courier):' : 'Поштова доставка (InPost / Кур’єр):'}
+                            </span>
+                            <span>
+                              {lang === 'pl'
+                                ? 'Paczkomat InPost (19 zł) lub Kurier DPD (25 zł) oraz wpisanie adresu / kodu paczkomatu nastąpi na kolejnym kroku w Stripe.'
+                                : lang === 'en'
+                                ? 'InPost Locker (19 zł) or DPD Courier (25 zł) and your delivery address / locker code will be selected on the next Stripe step.'
+                                : 'Paczkomat InPost (19 zł) або Кур’єр DPD (25 zł) разом із адресою / номером пачкомату обирається на наступному кроці у Stripe.'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ПЛАТЕЖНЫЕ МЕТОДЫ ДЛЯ ВСЕХ ПЛАТНЫХ ФОРМАТОВ (BLIK, КАРТЫ, STRIPE) */}
+                      {type !== 'consultation' && (
+                        <div className="mt-4 pt-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-[#d7cabb]">
+                          <div className="flex items-center gap-1.5 font-medium">
+                            <span className="text-amber-400">🔒</span>
+                            <span>{lang === 'pl' ? 'Bezpieczna płatność Stripe' : lang === 'en' ? 'Secure Stripe Payment' : 'Безпечна онлайн-оплата'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded bg-zinc-950 font-black text-[10px] tracking-wider text-amber-400 border border-zinc-700">BLIK</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white text-zinc-900 font-bold text-[10px]">Pay</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white text-zinc-900 font-bold text-[10px]">GPay</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white/20 text-white font-medium text-[10px]">Card</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="rounded-2xl bg-[#3d362e] p-5 text-[#f7f0e5] flex items-center justify-between">
@@ -1105,7 +1535,7 @@ export function WoodIQOrderModal({
                         </div>
                       </div>
                       <span className="text-3xl font-black text-emerald-400">
-                        0 zł
+                        0 zł (0 €)
                       </span>
                     </div>
                   )}
@@ -1114,13 +1544,35 @@ export function WoodIQOrderModal({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 px-6 py-4 font-black text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-lg"
+                    className="w-full rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 px-6 py-4 font-black text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-lg flex items-center justify-center gap-2"
                   >
-                    {loading
-                      ? wm.sendingBtn
-                      : type === 'consultation'
-                      ? (wm.consultationSubmitBtn || 'Замовити безкоштовну консультацію')
-                      : wm.submitBtn}
+                    {loading ? (
+                      wm.sendingBtn
+                    ) : type === 'consultation' ? (
+                      wm.consultationSubmitBtn || 'Замовити безкоштовну консультацію'
+                    ) : type === 'purchase' ? (
+                      <>
+                        <span>🔒</span>
+                        <span>
+                          {lang === 'pl'
+                            ? `Przejdź do kasy: ${total} zł + dostawa (Stripe)`
+                            : lang === 'en'
+                            ? `Proceed to Checkout: ${total} zł + shipping (Stripe)`
+                            : `Перейти до оплати: ${total} zł + доставка (Stripe)`}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🔒</span>
+                        <span>
+                          {lang === 'pl'
+                            ? `Zapłać teraz ${total} zł (BLIK / Karta)`
+                            : lang === 'en'
+                            ? `Pay now ${total} zł (BLIK / Card)`
+                            : `Сплатити зараз ${total} zł (BLIK / Картка)`}
+                        </span>
+                      </>
+                    )}
                   </button>
                 </form>
               </>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { validateBotSafety, recordSuccessfulSubmission } from "../utils/antiBot";
+import { initiatePurchaseCheckout, STRIPE_CONFIG } from "../services/paymentService";
+import { Xmark, Check, NavArrowDown } from "iconoir-react";
 
 const cities = [
   "Katowice",
@@ -237,13 +239,65 @@ export function BookingModal({
       formData.append("participants", participants.toString());
       formData.append("price", `${calculatePrice()} zł`);
 
-      const response = await fetch(import.meta.env.VITE_URL, {
-        method: "POST",
-        body: formData,
-      });
+      // 1. ЕСЛИ STRIPE АКТИВЕН — ОНЛАЙН-ОПЛАТА БИЛЕТОВ (BLIK / КАРТА)
+      if (STRIPE_CONFIG.isEnabled) {
+        const ticketPrice = calculatePrice();
+        const checkoutItems = [
+          {
+            name: `Квиток на гру Cashflow (${UK_CITY_NAMES[city] || city})`,
+            description: `${participants === 2 ? '2 учасники (Комбо)' : '1 учасник'}. Тренінг Robert Kiyosaki`,
+            quantity: 1,
+            price: ticketPrice,
+          },
+        ];
 
-      if (!response.ok) {
-        throw new Error("Server error");
+        const checkoutResult = await initiatePurchaseCheckout({
+          name: name.trim(),
+          phone: "+" + digits,
+          messenger: fullMessenger,
+          city: UK_CITY_NAMES[city] || city,
+          comment: `[Cashflow Club] ${participants === 2 ? '2 учасники' : '1 учасник'}`,
+          cartItems: checkoutItems,
+          total: ticketPrice,
+          currency: 'zł',
+        });
+
+        // Резервное сохранение в Google Таблицу
+        try {
+          formData.append('paymentStatus', checkoutResult.isMock ? '⏳ ОЖИДАЕТ (MOCK STRIPE)' : '⏳ ОЖИДАЕТ (STRIPE)');
+          formData.append('orderId', checkoutResult.orderId || '');
+          if (import.meta.env.VITE_URL) {
+            await fetch(import.meta.env.VITE_URL, { method: "POST", body: formData });
+          }
+        } catch (sheetErr) {
+          console.warn("Backup save warning:", sheetErr);
+        }
+
+        recordSuccessfulSubmission();
+
+        if (checkoutResult.isMock) {
+          window.location.href = checkoutResult.mockCheckoutUrl;
+          return;
+        } else if (checkoutResult.checkoutUrl || checkoutResult.url) {
+          window.location.href = checkoutResult.checkoutUrl || checkoutResult.url;
+          return;
+        } else {
+          throw new Error(checkoutResult.error || "Помилка ініціалізації оплати");
+        }
+      }
+
+      // 2. ЕСЛИ STRIPE ОТКЛЮЧЕН — ОБЫЧНАЯ РЕГИСТРАЦИЯ В GOOGLE ТАБЛИЦУ
+      try {
+        const response = await fetch(import.meta.env.VITE_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (sheetErr) {
+        throw new Error(`[Google Таблиця]: ${sheetErr.message}`);
       }
 
       // Фиксируем успешную отправку для rate-limiter
@@ -257,10 +311,12 @@ export function BookingModal({
       setTimeout(() => {
         handleCloseAndReset();
       }, 3000);
-    } catch {
+    } catch (err) {
+      console.error('Booking submission error:', err);
+      const specificError = err?.message && err?.message !== 'Server error' ? `: ${err.message}` : '';
       setStatus({
         type: "error",
-        message: bm.errorGeneral || "Помилка відправки",
+        message: `${bm.errorGeneral || "Помилка відправки"}${specificError}`,
       });
     } finally {
       setLoading(false);
@@ -287,18 +343,19 @@ export function BookingModal({
         }
       }}
     >
-      <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(0,0,0,0.7)] max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
         <button
+          type="button"
           onClick={handleCloseAndReset}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-lime-400 transition cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition cursor-pointer"
         >
-          ✕
+          <Xmark className="w-4 h-4" />
         </button>
 
         {status.type === "success" ? (
           <div className="text-center py-8">
-            <div className="w-16 h-16 mx-auto rounded-full bg-lime-400/20 flex items-center justify-center mb-5">
-              <span className="text-3xl">✅</span>
+            <div className="w-14 h-14 mx-auto rounded-full bg-lime-400/10 border border-lime-400/20 flex items-center justify-center mb-5">
+              <Check className="w-7 h-7 text-lime-400" />
             </div>
 
             <h3 className="text-2xl font-bold text-white mb-3">
@@ -310,6 +367,7 @@ export function BookingModal({
             </p>
 
             <button
+              type="button"
               onClick={handleCloseAndReset}
               className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition cursor-pointer"
             >
@@ -318,7 +376,7 @@ export function BookingModal({
           </div>
         ) : (
           <>
-            <div className="mb-6">
+            <div className="mb-6 pr-8">
               <h3 className="text-2xl font-bold text-white mb-1">
                 {bm.title || "Забронювати місце"}
               </h3>
@@ -366,7 +424,7 @@ export function BookingModal({
                     onClick={() => setParticipants(1)}
                     className={`py-3 px-3 rounded-xl border text-left transition cursor-pointer ${
                       participants === 1
-                        ? "bg-lime-400/10 border-lime-400 text-white"
+                        ? "bg-lime-400/10 border-lime-400/60 text-white"
                         : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                     }`}
                   >
@@ -379,7 +437,7 @@ export function BookingModal({
                     onClick={() => setParticipants(2)}
                     className={`py-3 px-3 rounded-xl border text-left transition cursor-pointer ${
                       participants === 2
-                        ? "bg-lime-400/10 border-lime-400 text-white"
+                        ? "bg-lime-400/10 border-lime-400/60 text-white"
                         : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                     }`}
                   >
@@ -396,8 +454,8 @@ export function BookingModal({
                     {bm.nameLabel || "Ім'я"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.name && (
-                    <span className="text-xs font-bold text-rose-400 animate-bounce">
-                      ⚠️ {fieldErrors.name}
+                    <span className="text-[11px] font-medium text-rose-400">
+                      {fieldErrors.name}
                     </span>
                   )}
                 </div>
@@ -413,10 +471,10 @@ export function BookingModal({
                     }
                   }}
                   placeholder={bm.namePlaceholder || "Олександр"}
-                  className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-200 ${
+                  className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-150 ${
                     fieldErrors.name
-                      ? "border-2 border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
-                      : "border border-zinc-800 focus:border-lime-400"
+                      ? "border border-rose-500 bg-rose-500/5 focus:ring-1 focus:ring-rose-500"
+                      : "border border-zinc-800 focus:border-lime-400/60 focus:ring-1 focus:ring-lime-400/20"
                   }`}
                 />
               </div>
@@ -428,8 +486,8 @@ export function BookingModal({
                     {bm.phoneLabel || "Телефон"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.phone && (
-                    <span className="text-xs font-bold text-rose-400 animate-bounce">
-                      ⚠️ {fieldErrors.phone}
+                    <span className="text-[11px] font-medium text-rose-400">
+                      {fieldErrors.phone}
                     </span>
                   )}
                 </div>
@@ -438,10 +496,10 @@ export function BookingModal({
                   type="tel"
                   value={phone}
                   onChange={handlePhoneChange}
-                  className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-200 ${
+                  className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-150 ${
                     fieldErrors.phone
-                      ? "border-2 border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
-                      : "border border-zinc-800 focus:border-lime-400"
+                      ? "border border-rose-500 bg-rose-500/5 focus:ring-1 focus:ring-rose-500"
+                      : "border border-zinc-800 focus:border-lime-400/60 focus:ring-1 focus:ring-lime-400/20"
                   }`}
                 />
               </div>
@@ -453,25 +511,28 @@ export function BookingModal({
                     {bm.contactLabel || "Месенджер"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.messenger && (
-                    <span className="text-xs font-bold text-rose-400 animate-bounce">
-                      ⚠️ {fieldErrors.messenger}
+                    <span className="text-[11px] font-medium text-rose-400">
+                      {fieldErrors.messenger}
                     </span>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                  <select
-                    value={messengerPlatform}
-                    onChange={(e) => setMessengerPlatform(e.target.value)}
-                    className="sm:col-span-2 rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-3 text-white outline-none focus:border-lime-400 text-xs font-semibold cursor-pointer"
-                  >
-                    <option value="Telegram">Telegram</option>
-                    <option value="Instagram">Instagram</option>
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Viber">Viber</option>
-                    <option value={lang === 'pl' ? 'Telefon' : lang === 'en' ? 'Phone call' : 'Дзвінок'}>
-                      {lang === 'pl' ? 'Telefon (rozmowa)' : lang === 'en' ? 'Phone call' : 'Дзвінок'}
-                    </option>
-                  </select>
+                  <div className="sm:col-span-2 relative">
+                    <select
+                      value={messengerPlatform}
+                      onChange={(e) => setMessengerPlatform(e.target.value)}
+                      className="w-full appearance-none rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-3 pr-8 text-white outline-none focus:border-lime-400/60 text-xs font-semibold cursor-pointer"
+                    >
+                      <option value="Telegram">Telegram</option>
+                      <option value="Instagram">Instagram</option>
+                      <option value="WhatsApp">WhatsApp</option>
+                      <option value="Viber">Viber</option>
+                      <option value={lang === 'pl' ? 'Telefon' : lang === 'en' ? 'Phone call' : 'Дзвінок'}>
+                        {lang === 'pl' ? 'Telefon (rozmowa)' : lang === 'en' ? 'Phone call' : 'Дзвінок'}
+                      </option>
+                    </select>
+                    <NavArrowDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 w-3.5 h-3.5" />
+                  </div>
 
                   <input
                     ref={messengerRef}
@@ -492,10 +553,10 @@ export function BookingModal({
                         ? (lang === 'pl' ? 'Wygodna godzina na telefon' : lang === 'en' ? 'Preferred call time' : 'Зручний час дзвінка')
                         : bm.messengerHandlePlaceholder || (lang === 'pl' ? '@nick lub numer' : '@username або номер')
                     }
-                    className={`sm:col-span-3 rounded-xl bg-zinc-950 px-3.5 py-3 text-white outline-none text-sm transition-all ${
+                    className={`sm:col-span-3 rounded-xl bg-zinc-950 px-3.5 py-3 text-white outline-none text-sm transition-all duration-150 ${
                       fieldErrors.messenger
-                        ? "border-2 border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
-                        : "border border-zinc-800 focus:border-lime-400"
+                        ? "border border-rose-500 bg-rose-500/5 focus:ring-1 focus:ring-rose-500"
+                        : "border border-zinc-800 focus:border-lime-400/60 focus:ring-1 focus:ring-lime-400/20"
                     }`}
                   />
                 </div>
@@ -508,60 +569,94 @@ export function BookingModal({
                     {bm.cityLabel || "Місто"} <span className="text-rose-400">*</span>
                   </label>
                   {fieldErrors.city && (
-                    <span className="text-xs font-bold text-rose-400 animate-bounce">
-                      ⚠️ {fieldErrors.city}
+                    <span className="text-[11px] font-medium text-rose-400">
+                      {fieldErrors.city}
                     </span>
                   )}
                 </div>
-                <select
-                  ref={cityRef}
-                  value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                    if (fieldErrors.city) {
-                      setFieldErrors((prev) => ({ ...prev, city: "" }));
-                    }
-                  }}
-                  className={`w-full rounded-xl bg-zinc-950 px-4 py-3 text-white outline-none transition-all duration-200 cursor-pointer ${
-                    fieldErrors.city
-                      ? "border-2 border-rose-500 bg-rose-950/20"
-                      : "border border-zinc-800 focus:border-lime-400"
-                  }`}
-                >
-                  {cities.map((c) => (
-                    <option key={c} value={c} className="bg-zinc-900 text-white">
-                      {c}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    ref={cityRef}
+                    value={city}
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      if (fieldErrors.city) {
+                        setFieldErrors((prev) => ({ ...prev, city: "" }));
+                      }
+                    }}
+                    className={`w-full appearance-none rounded-xl bg-zinc-950 px-4 py-3 pr-10 text-white outline-none transition-all duration-150 cursor-pointer ${
+                      fieldErrors.city
+                        ? "border border-rose-500 bg-rose-500/5"
+                        : "border border-zinc-800 focus:border-lime-400/60 focus:ring-1 focus:ring-lime-400/20"
+                    }`}
+                  >
+                    {cities.map((c) => (
+                      <option key={c} value={c} className="bg-zinc-900 text-white">
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <NavArrowDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                </div>
               </div>
 
               {/* ИТОГОВАЯ СТОИМОСТЬ */}
-              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex justify-between items-center">
-                <div>
-                  <span className="text-xs text-zinc-400 block">{bm.participantsSummary || "Учасники"}</span>
-                  <span className="text-sm font-bold text-white">
-                    {participants === 2 ? (bm.participant2 || "2 учасники") : (bm.participant1 || "1 учасник")}
-                  </span>
+              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-xs text-zinc-400 block">{bm.participantsSummary || "Учасники"}</span>
+                    <span className="text-sm font-bold text-white">
+                      {participants === 2 ? (bm.participant2 || "2 учасники") : (bm.participant1 || "1 учасник")}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-zinc-400 block">{bm.costSummary || "Вартість"}</span>
+                    <span className="text-xl font-bold text-lime-400">
+                      {calculatePrice()} zł
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs text-zinc-400 block">{bm.costSummary || "Вартість"}</span>
-                  <span className="text-xl font-bold text-lime-400">
-                    {calculatePrice()} zł
-                  </span>
-                </div>
+
+                {/* ПЛАТЕЖНЫЕ МЕТОДЫ (BLIK, КАРТЫ, STRIPE) */}
+                {STRIPE_CONFIG.isEnabled && (
+                  <div className="mt-3 pt-3 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <span className="text-lime-400">🔒</span>
+                      <span>{lang === 'pl' ? 'Bezpieczna płatność Stripe' : lang === 'en' ? 'Secure Stripe Payment' : 'Безпечна онлайн-оплата'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-900 font-black text-[10px] tracking-wider text-lime-400 border border-zinc-700">BLIK</span>
+                      <span className="px-1.5 py-0.5 rounded bg-white text-zinc-900 font-bold text-[10px]">Pay</span>
+                      <span className="px-1.5 py-0.5 rounded bg-white text-zinc-900 font-bold text-[10px]">GPay</span>
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-white font-medium text-[10px]">Card</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* КНОПКА ОТПРАВКИ */}
               <button
                 type="submit"
                 disabled={loading || (placesLeft !== null && placesLeft <= 0)}
-                className="w-full py-4 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-black rounded-xl transition duration-200 shadow-[0_0_25px_rgba(163,230,53,0.3)] hover:shadow-[0_0_35px_rgba(163,230,53,0.4)] cursor-pointer"
+                className="w-full py-3.5 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition duration-150 shadow-sm cursor-pointer active:scale-[0.99] flex items-center justify-center gap-2"
               >
                 {loading
                   ? (bm.sendingBtn || "Надсилання...")
                   : placesLeft !== null && placesLeft <= 0
                   ? (bm.closedBtn || "Реєстрація закрита")
+                  : STRIPE_CONFIG.isEnabled
+                  ? (
+                    <>
+                      <span>🔒</span>
+                      <span>
+                        {lang === 'pl'
+                          ? 'Opłać bilet online (BLIK / Karta)'
+                          : lang === 'en'
+                          ? 'Pay Ticket Online (BLIK / Card)'
+                          : 'Оплатити квиток онлайн (BLIK / Картка)'}
+                      </span>
+                    </>
+                  )
                   : (bm.submitBtn || "Забронювати")}
               </button>
             </form>

@@ -10,23 +10,23 @@ export const ProductSwitcher = ({ activePage, setActivePage }) => {
   return (
     <button
       onClick={() => setActivePage(isCashflow ? 'woodiq' : 'cashflow')}
-      className={`fixed bottom-5 right-5 z-50 group flex items-center gap-2 sm:gap-3 rounded-2xl border p-2 sm:px-3.5 sm:py-3 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] shadow-2xl ${
+      className={`fixed bottom-5 right-5 z-50 group flex items-center gap-3 rounded-2xl border p-2 sm:px-3.5 sm:py-2.5 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 shadow-xl cursor-pointer ${
         isCashflow
-          ? 'bg-zinc-900/95 border-amber-400/30 hover:border-amber-400/60'
-          : 'bg-zinc-900/95 border-lime-400/30 hover:border-lime-400/60'
+          ? 'bg-zinc-900/95 border-zinc-800 hover:border-amber-400/40 shadow-black/40'
+          : 'bg-zinc-900/95 border-zinc-800 hover:border-lime-400/40 shadow-black/40'
       }`}
       aria-label={isCashflow ? 'WOODIQ' : 'CASHFLOW CLUB'}
     >
-      {/* Иконка */}
+      {/* Icon Emblem */}
       <div
-        className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300 shrink-0 ${
+        className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all shrink-0 ${
           isCashflow
-            ? 'bg-amber-400/15 text-amber-400 group-hover:bg-amber-400/25'
-            : 'bg-lime-400/15 text-lime-400 group-hover:bg-lime-400/25'
+            ? 'bg-amber-400/10 text-amber-400 border border-amber-400/20'
+            : 'bg-lime-400/10 text-lime-400 border border-lime-400/20'
         }`}
       >
         {isCashflow ? (
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+          <div className="w-6 h-6 overflow-hidden flex items-center justify-center">
             <img
               src={woodiqLogo}
               alt="WOODIQ"
@@ -35,7 +35,7 @@ export const ProductSwitcher = ({ activePage, setActivePage }) => {
           </div>
         ) : (
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -50,28 +50,28 @@ export const ProductSwitcher = ({ activePage, setActivePage }) => {
         )}
       </div>
 
-      {/* Текст */}
-      <div className="text-left pr-1">
-        <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-0.5">
+      {/* Label and Subtext */}
+      <div className="text-left pr-1 hidden xs:block sm:block">
+        <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-0.5">
           {isCashflow ? sw.anotherProduct : sw.weAlsoHave}
         </div>
 
         <div
-          className={`text-sm font-extrabold ${
+          className={`text-xs sm:text-sm font-bold ${
             isCashflow ? 'text-amber-400' : 'text-lime-400'
           }`}
         >
           {isCashflow ? sw.woodiqTitle : sw.cashflowTitle}
         </div>
 
-        <div className="text-xs text-zinc-400 max-w-[150px] leading-tight">
+        <div className="text-[11px] text-zinc-400 max-w-[140px] leading-tight hidden sm:block">
           {isCashflow ? sw.woodiqDesc : sw.cashflowDesc}
         </div>
       </div>
 
-      {/* Стрелка */}
+      {/* Arrow Indicator */}
       <svg
-        className={`w-4 h-4 text-zinc-500 transition-transform duration-300 group-hover:translate-x-1 ${
+        className={`w-4 h-4 text-zinc-500 transition-transform duration-200 group-hover:translate-x-0.5 ${
           isCashflow ? 'group-hover:text-amber-400' : 'group-hover:text-lime-400'
         }`}
         fill="none"

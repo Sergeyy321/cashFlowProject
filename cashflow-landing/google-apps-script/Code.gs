@@ -1,71 +1,112 @@
 /**
  * =========================================================================
- * GOOGLE APPS SCRIPT: Сбор заявок в Google Таблицу + Email-уведомления
+ * GOOGLE APPS SCRIPT: Сбор заявок в Google Таблицу + Email-уведомления v3
  * =========================================================================
  */
 
 // 1. УКАЖИТЕ ВАШ EMAIL ДЛЯ ПОЛУЧЕНИЯ УВЕДОМЛЕНИЙ:
-var ADMIN_EMAIL = 'your-email@gmail.com'; 
+var ADMIN_EMAIL = 'your-email@gmail.com'; // <-- Замените на ваш реальный email!
 
-// Вспомогательная функция безопасного получения email (автоматический fallback)
+// Безопасное получение email получателя
 function getAdminEmail() {
   try {
     if (typeof ADMIN_EMAIL !== 'undefined' && ADMIN_EMAIL && ADMIN_EMAIL !== 'your-email@gmail.com') {
-      return ADMIN_EMAIL;
+      return ADMIN_EMAIL.trim();
     }
   } catch (e) {}
 
   // Автоматически берем email владельца Google Таблицы, если переменная не задана
   try {
     var ownerEmail = Session.getEffectiveUser().getEmail() || Session.getActiveUser().getEmail();
-    if (ownerEmail) return ownerEmail;
+    if (ownerEmail) return ownerEmail.trim();
   } catch (e) {}
 
   return '';
 }
 
 // =========================================================================
-// ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ И АКТИВАЦИИ ПРАВ (НАЖМИТЕ «ВЫПОЛНИТЬ»):
+// ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ И АКТИВАЦИИ ПРАВ (НАЖМИТЕ «ВЫПОЛНИТЬ» В APPS SCRIPT):
 // =========================================================================
 function testEmail() {
   var recipient = getAdminEmail();
-  Logger.log('Отправка тестового письма на: ' + recipient);
+  Logger.log('Проверка отправки на: ' + recipient);
   
-  if (!recipient) {
-    throw new Error('Пожалуйста, укажите ваш email в переменной ADMIN_EMAIL в строке 8!');
+  if (!recipient || recipient === 'your-email@gmail.com') {
+    throw new Error('Пожалуйста, укажите ваш настоящий email в переменной ADMIN_EMAIL в строке 8!');
   }
+
+  var remaining = MailApp.getRemainingDailyEmails();
+  Logger.log('Остаток доступных писем на сегодня: ' + remaining);
 
   var subject = '✅ Тестовое уведомление: Cashflow & WoodIQ';
   var html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #10b981; border-radius: 10px; max-width: 500px;">
       <h2 style="color: #10b981; margin-top: 0;">✅ Почта успешно подключена!</h2>
       <p>Google Apps Script авторизован и готов присылать вам уведомления о каждой новой заявке с сайта.</p>
-      <p style="color: #71717a; font-size: 12px;">Получатель: ${recipient}</p>
-      <p style="color: #71717a; font-size: 12px;">Время: ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Warsaw' })}</p>
+      <p style="color: #71717a; font-size: 13px;"><b>Получатель:</b> ${recipient}</p>
+      <p style="color: #71717a; font-size: 13px;"><b>Доступно писем сегодня:</b> ${remaining}</p>
+      <p style="color: #71717a; font-size: 13px;"><b>Время:</b> ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Warsaw' })}</p>
     </div>
   `;
 
-  try {
-    GmailApp.sendEmail(recipient, subject, '', {
-      name: 'Cashflow & WoodIQ',
-      htmlBody: html
-    });
-  } catch (e) {
-    MailApp.sendEmail({
-      to: recipient,
-      subject: subject,
-      htmlBody: html
-    });
+  var sendResult = sendRawEmail(recipient, subject, html, 'Cashflow & WoodIQ');
+  if (!sendResult.success) {
+    throw new Error('Ошибка отправки: ' + sendResult.error);
   }
 
   Logger.log('Тестовое письмо успешно отправлено на: ' + recipient);
 }
 
+// Универсальная функция отправки email с возвратом точного статуса ошибки
+function sendRawEmail(recipient, subject, htmlBody, senderName) {
+  if (!recipient || recipient === 'your-email@gmail.com') {
+    return { success: false, error: 'Email не настроен в строке 8 (ADMIN_EMAIL)' };
+  }
+
+  try {
+    GmailApp.sendEmail(recipient, subject, '', {
+      name: senderName || 'Cashflow & WoodIQ',
+      htmlBody: htmlBody
+    });
+    return { success: true };
+  } catch (e1) {
+    try {
+      MailApp.sendEmail({
+        to: recipient,
+        subject: subject,
+        htmlBody: htmlBody,
+        name: senderName || 'Cashflow & WoodIQ'
+      });
+      return { success: true };
+    } catch (e2) {
+      return { success: false, error: e2.toString() };
+    }
+  }
+}
+
 // ==========================================
-// 1. ОБРАБОТКА GET-ЗАПРОСА (Загрузка настроек)
+// 1. ОБРАБОТКА GET-ЗАПРОСА (Загрузка настроек + Диагностика)
 // ==========================================
 function doGet(e) {
   try {
+    var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : '';
+
+    // Режим онлайн-диагностики доступности скрипта и квот
+    if (action === 'diagnose' || action === 'check') {
+      var adminEmail = getAdminEmail();
+      var quota = 0;
+      try { quota = MailApp.getRemainingDailyEmails(); } catch (err) {}
+
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        status: 'online',
+        configuredEmail: adminEmail || 'НЕ_УКАЗАН',
+        dailyEmailsLeft: quota,
+        effectiveUser: Session.getEffectiveUser().getEmail() || 'anonymous',
+        serverTime: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Warsaw' })
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var settingsSheet = ss.getSheetByName('Settings') || ss.getSheetByName('Настройки');
 
@@ -121,7 +162,7 @@ function doGet(e) {
 }
 
 // ==========================================
-// 2. ОБРАБОТКА POST-ЗАПРОСА (Новая заявка)
+// 2. ОБРАБОТКА POST-ЗАПРОСА (Новая заявка с сайта)
 // ==========================================
 function doPost(e) {
   try {
@@ -137,6 +178,7 @@ function doPost(e) {
     var dateNow = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Warsaw' });
 
     var isWoodIQ = p.orderType === 'woodiq';
+    var emailStatus = 'Ожидание';
 
     if (isWoodIQ) {
       // ----------------------------------------------------
@@ -157,28 +199,60 @@ function doPost(e) {
           'Доставка',
           'Цена',
           'Итого',
-          'Комментарий'
+          'Комментарий',
+          'Email статус'
         ]);
-        sheet.getRange(1, 1, 1, 12).setFontWeight('bold').setBackground('#f5efe4');
+        sheet.getRange(1, 1, 1, 13).setFontWeight('bold').setBackground('#f5efe4');
       }
 
-      sheet.appendRow([
-        dateNow,
-        p.type === 'purchase' ? 'Покупка' : 'Аренда',
-        p.name || '',
-        p.phone || '',
-        p.messenger || '',
-        p.city || '',
-        p.games || '',
-        p.days || '0',
-        p.delivery === 'true' ? 'Да (+100 zł)' : 'Нет',
-        p.price || '',
-        p.total || '',
-        p.comment || ''
-      ]);
+      var isStripePaid = p.paymentStatus && (p.paymentStatus.indexOf('ОПЛАЧЕНО') !== -1 || p.paymentStatus.indexOf('STRIPE') !== -1);
+      var updatedExisting = false;
+      var targetRow = 0;
+
+      if (isStripePaid && p.orderId) {
+        var lastRow = sheet.getLastRow();
+        if (lastRow > 1) {
+          var data = sheet.getRange(2, 1, lastRow - 1, 13).getValues();
+          for (var r = data.length - 1; r >= 0; r--) {
+            var rowComment = String(data[r][11] || '');
+            var rowPhone = String(data[r][3] || '').replace(/\D/g, '');
+            var pPhone = String(p.phone || '').replace(/\D/g, '');
+            if ((p.orderId && rowComment.indexOf(p.orderId) !== -1) || (pPhone && pPhone.length > 7 && rowPhone === pPhone)) {
+              targetRow = r + 2;
+              sheet.getRange(targetRow, 2).setValue('✅ ОПЛАЧЕНО (STRIPE)');
+              if (p.delivery) sheet.getRange(targetRow, 9).setValue(p.delivery);
+              if (p.total) sheet.getRange(targetRow, 11).setValue(p.total);
+              sheet.getRange(targetRow, 12).setValue(p.comment || rowComment);
+              updatedExisting = true;
+              break;
+            }
+          }
+        }
+      }
 
       // Отправка Email-уведомления
-      sendWoodIQEmailNotification(p, dateNow);
+      var emailRes = sendWoodIQEmailNotification(p, dateNow);
+      emailStatus = emailRes.success ? '✅ Отправлено (' + dateNow + ')' : '❌ Ошибка: ' + emailRes.error;
+
+      if (!updatedExisting) {
+        sheet.appendRow([
+          dateNow,
+          p.paymentStatus || (p.type === 'purchase' ? 'Покупка' : 'Аренда'),
+          p.name || '',
+          p.phone || '',
+          p.messenger || '',
+          p.city || '',
+          p.games || '',
+          p.days || '—',
+          p.delivery || (p.delivery === 'true' ? 'Да (+100 zł)' : 'Нет'),
+          p.price || '',
+          p.total || '',
+          p.comment || '',
+          emailStatus
+        ]);
+      } else {
+        sheet.getRange(targetRow, 13).setValue(emailStatus);
+      }
 
     } else {
       // ----------------------------------------------------
@@ -194,10 +268,15 @@ function doPost(e) {
           'Мессенджер',
           'Город',
           'Кол-во участников',
-          'Стоимость'
+          'Стоимость',
+          'Email статус'
         ]);
-        sheetCashflow.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#e6f4ea');
+        sheetCashflow.getRange(1, 1, 1, 8).setFontWeight('bold').setBackground('#e6f4ea');
       }
+
+      // Отправка Email-уведомления
+      var emailResCf = sendCashflowEmailNotification(p, dateNow);
+      emailStatus = emailResCf.success ? '✅ Отправлено (' + dateNow + ')' : '❌ Ошибка: ' + emailResCf.error;
 
       sheetCashflow.appendRow([
         dateNow,
@@ -206,16 +285,15 @@ function doPost(e) {
         p.messenger || '',
         p.city || '',
         p.tier || '1',
-        (p.price || '') + ' PLN'
+        (p.price || '') + ' PLN',
+        emailStatus
       ]);
-
-      // Отправка Email-уведомления
-      sendCashflowEmailNotification(p, dateNow);
     }
 
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
-      message: 'Заявка успешно сохранена'
+      message: 'Заявка успешно сохранена',
+      emailStatus: emailStatus
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
@@ -231,9 +309,10 @@ function doPost(e) {
 // ==========================================
 function sendCashflowEmailNotification(p, dateNow) {
   var recipient = getAdminEmail();
-  if (!recipient) return;
+  if (!recipient || recipient === 'your-email@gmail.com') {
+    return { success: false, error: 'Email администратора не настроен (строка 8)' };
+  }
 
-  // Защита от запуска вручную из редактора без параметров
   p = p || {
     name: 'Тестовый Игрок',
     phone: '+48 123 456 789',
@@ -292,22 +371,7 @@ function sendCashflowEmailNotification(p, dateNow) {
     </div>
   `;
 
-  try {
-    GmailApp.sendEmail(recipient, subject, '', {
-      name: 'Cashflow Club',
-      htmlBody: htmlBody
-    });
-  } catch (e) {
-    try {
-      MailApp.sendEmail({
-        to: recipient,
-        subject: subject,
-        htmlBody: htmlBody
-      });
-    } catch (err) {
-      Logger.log('Ошибка отправки email: ' + err.toString());
-    }
-  }
+  return sendRawEmail(recipient, subject, htmlBody, 'Cashflow Club');
 }
 
 // ==========================================
@@ -315,9 +379,10 @@ function sendCashflowEmailNotification(p, dateNow) {
 // ==========================================
 function sendWoodIQEmailNotification(p, dateNow) {
   var recipient = getAdminEmail();
-  if (!recipient) return;
+  if (!recipient || recipient === 'your-email@gmail.com') {
+    return { success: false, error: 'Email администратора не настроен (строка 8)' };
+  }
 
-  // Защита от запуска вручную из редактора без параметров
   p = p || {
     type: 'rental',
     name: 'Тестовый Заказчик',
@@ -333,21 +398,31 @@ function sendWoodIQEmailNotification(p, dateNow) {
   };
   dateNow = dateNow || new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Warsaw' });
 
-  var isPurchase = p.type === 'purchase';
-  var typeLabel = isPurchase ? '🛒 Покупка игр' : '🎪 Аренда на мероприятие';
-  var subject = `🪵 Новая заявка WoodIQ (${typeLabel}): ${p.name || 'Клиент'}`;
+  var isPurchase = p.type === 'purchase' || (p.type && p.type.indexOf('Куп') !== -1);
+  var isPaid = p.paymentStatus && (p.paymentStatus.indexOf('ОПЛАЧЕНО') !== -1 || p.paymentStatus.indexOf('STRIPE') !== -1);
+  var typeLabel = isPaid 
+    ? '💳 ОПЛАЧЕНО ЧЕРЕЗ STRIPE' 
+    : (isPurchase ? '🛒 Покупка игр' : '🎪 Аренда на мероприятие');
+  
+  var subject = isPaid
+    ? `💳 ОПЛАЧЕН заказ WoodIQ: ${p.name || 'Клиент'} (${p.total || p.price || ''})`
+    : `🪵 Новая заявка WoodIQ (${typeLabel}): ${p.name || 'Клиент'}`;
+
+  var headerBg = isPaid 
+    ? 'linear-gradient(135deg, #10b981, #059669)' 
+    : 'linear-gradient(135deg, #f59e0b, #d97706)';
 
   var htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
-      <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 24px; color: #ffffff;">
-        <h2 style="margin: 0; font-size: 22px;">🪵 Новая заявка: WOOD IQ</h2>
+      <div style="background: ${headerBg}; padding: 24px; color: #ffffff;">
+        <h2 style="margin: 0; font-size: 22px;">${isPaid ? '💳 ЗАКАЗ ОПЛАЧЕН ОНЛАЙН' : '🪵 Новая заявка: WOOD IQ'}</h2>
         <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.95;">${typeLabel}</p>
       </div>
 
       <div style="padding: 24px;">
         <table style="width: 100%; border-collapse: collapse;">
           <tr style="border-bottom: 1px solid #f0f0f0;">
-            <td style="padding: 10px 0; color: #71717a; width: 40%;">📅 Дата заявки:</td>
+            <td style="padding: 10px 0; color: #71717a; width: 40%;">📅 Дата:</td>
             <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${dateNow}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
@@ -360,59 +435,100 @@ function sendWoodIQEmailNotification(p, dateNow) {
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
             <td style="padding: 10px 0; color: #71717a;">💬 Способ связи:</td>
-            <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.messenger || 'Telegram'}</td>
+            <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.messenger || 'Telegram / Stripe'}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
             <td style="padding: 10px 0; color: #71717a;">📍 Город:</td>
             <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.city || '—'}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
-            <td style="padding: 10px 0; color: #71717a;">🎲 Количество игр:</td>
+            <td style="padding: 10px 0; color: #71717a;">🎲 Выбранные товары:</td>
             <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.games || '—'}</td>
           </tr>
-          ${!isPurchase ? `
+          ${p.paczkomat && p.paczkomat !== '—' ? `
+          <tr style="border-bottom: 1px solid #f0f0f0; background-color: #ecfdf5;">
+            <td style="padding: 10px; color: #047857; font-weight: bold;">📦 Paczkomat InPost:</td>
+            <td style="padding: 10px; font-weight: bold; color: #047857; font-size: 15px;">${p.paczkomat}</td>
+          </tr>
+          ` : ''}
+          ${p.address && p.address !== 'Адрес не указан' ? `
+          <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 10px 0; color: #71717a;">🏠 Адрес доставки:</td>
+            <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.address}</td>
+          </tr>
+          ` : ''}
+          ${!isPurchase && !isPaid ? `
           <tr style="border-bottom: 1px solid #f0f0f0;">
             <td style="padding: 10px 0; color: #71717a;">⏱️ Срок аренды:</td>
             <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.days} дн.</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
             <td style="padding: 10px 0; color: #71717a;">🚚 Доставка и монтаж:</td>
-            <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.delivery === 'true' ? 'Да (+100 zł)' : 'Нет'}</td>
+            <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.delivery === 'true' ? 'Да (+100 zł)' : (p.delivery || 'Нет')}</td>
           </tr>
           ` : ''}
           ${p.comment ? `
           <tr style="border-bottom: 1px solid #f0f0f0;">
-            <td style="padding: 10px 0; color: #71717a;">📝 Комментарий / Игра:</td>
+            <td style="padding: 10px 0; color: #71717a;">📝 Комментарий / Детали:</td>
             <td style="padding: 10px 0; font-weight: bold; color: #18181b;">${p.comment}</td>
           </tr>
           ` : ''}
           <tr>
-            <td style="padding: 12px 0; color: #71717a; font-size: 16px;">💰 Итого:</td>
-            <td style="padding: 12px 0; font-weight: bold; font-size: 18px; color: #d97706;">${p.total || p.price}</td>
+            <td style="padding: 12px 0; color: #71717a; font-size: 16px;">💰 Сумма:</td>
+            <td style="padding: 12px 0; font-weight: bold; font-size: 18px; color: ${isPaid ? '#059669' : '#d97706'};">${p.total || p.price}</td>
           </tr>
         </table>
       </div>
 
       <div style="background-color: #f4f4f5; padding: 16px; text-align: center; font-size: 12px; color: #71717a;">
-        Заявка сохранена в Google Таблицу («Заявки WoodIQ»).
+        ${isPaid ? '✅ Заказ автоматически синхронизирован и отмечен оплаченным в Google Таблице («Заявки WoodIQ»).' : 'Заявка сохранена в Google Таблицу («Заявки WoodIQ»).'}
       </div>
     </div>
   `;
 
+  return sendRawEmail(recipient, subject, htmlBody, 'WoodIQ');
+}
+
+// =========================================================================
+// 5. ТРИГГЕР НА РУЧНЫЕ ИЗМЕНЕНИЯ В ТАБЛИЦЕ (если нужно уведомлять о правках)
+// =========================================================================
+// Чтобы активировать: в меню Apps Script выберите Триггеры (значок будильника) ->
+// Добавить триггер -> функция onSheetEdit -> Выбор источника: Из таблицы -> Тип события: При редактировании
+function onSheetEdit(e) {
   try {
-    GmailApp.sendEmail(recipient, subject, '', {
-      name: 'WoodIQ',
-      htmlBody: htmlBody
-    });
-  } catch (e) {
-    try {
-      MailApp.sendEmail({
-        to: recipient,
-        subject: subject,
-        htmlBody: htmlBody
-      });
-    } catch (err) {
-      Logger.log('Ошибка отправки email: ' + err.toString());
-    }
+    if (!e || !e.range) return;
+    var sheet = e.range.getSheet();
+    var sheetName = sheet.getName();
+
+    // Не отправлять письма при технических листах
+    if (sheetName === 'Settings' || sheetName === 'Настройки') return;
+
+    var row = e.range.getRow();
+    if (row === 1) return; // Заголовки игнорируем
+
+    var recipient = getAdminEmail();
+    if (!recipient || recipient === 'your-email@gmail.com') return;
+
+    var user = e.user ? e.user.getEmail() : 'Пользователь';
+    var oldValue = e.oldValue || '—';
+    var newValue = e.value || '—';
+    var cellA1 = e.range.getA1Notation();
+
+    var subject = `📝 Изменение в таблице [${sheetName}] ячейка ${cellA1}`;
+    var htmlBody = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #d4d4d8; border-radius: 8px;">
+        <h3 style="color: #3f3f46; margin-top: 0;">Изменение в Google Таблице</h3>
+        <p><b>Лист:</b> ${sheetName}</p>
+        <p><b>Ячейка:</b> ${cellA1} (Строка ${row})</p>
+        <p><b>Старое значение:</b> ${oldValue}</p>
+        <p><b>Новое значение:</b> ${newValue}</p>
+        <p><b>Кем изменено:</b> ${user}</p>
+        <p><b>Время:</b> ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Warsaw' })}</p>
+      </div>
+    `;
+
+    sendRawEmail(recipient, subject, htmlBody, 'Google Sheets Monitor');
+  } catch (err) {
+    Logger.log('Ошибка триггера onSheetEdit: ' + err.toString());
   }
 }
